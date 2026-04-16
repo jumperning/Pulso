@@ -4,7 +4,7 @@
  */
 
 export const Session = {
-  API_URL: 'https://pulsoback.onrender.com/',
+  API_URL: 'https://pulsoback.onrender.com',
 
   /** Lee el token guardado */
   getToken() {

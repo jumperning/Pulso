@@ -1,5 +1,5 @@
 // src/pages/dashboard.js
-  const API_URL     = 'https://pulsoback.onrender.com/';
+  const API_URL     = 'https://pulsoback.onrender.com';
     business_idlocalStorage.getItem('od_business_id') || '';
     const token       = localStorage.getItem('od_token') || '';
 
