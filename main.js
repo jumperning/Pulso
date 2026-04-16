@@ -19,7 +19,7 @@ window.openTableDetail = async (tableName) => {
     drawer.classList.remove('translate-x-full');
     console.log("Cargando mesa:", tableName);
 
-    const API_URL     = 'http://localhost:3000';
+    const API_URL     = 'https://pulsoback.onrender.com/';
     const business_id = localStorage.getItem('od_business_id') || '';
     const token       = localStorage.getItem('od_token') || '';
 

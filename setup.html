@@ -643,7 +643,7 @@
 <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
 
 <script>
-  const API_URL     = 'http://localhost:3000';
+  const API_URL     = 'https://pulsoback.onrender.com/';
   const HEADERS     = {'Content-Type':'application/json'};
 
   // =====================================================================
@@ -1058,7 +1058,7 @@ Respondé SOLO con JSON sin markdown:
 
     let result;
     try {
-      const res  = await fetch('http://localhost:3000/ai', {
+      const res  = await fetch('https://pulsoback.onrender.com//ai', {
         method:'POST', headers:{...HEADERS},
         body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
       });
