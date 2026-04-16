@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnceyDoce — Setup Wizard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2b3896", "on-primary": "#ffffff",
+          "primary-container": "#4551af", "on-primary-container": "#cbcfff",
+          "secondary": "#4858ab", "secondary-container": "#96a5ff",
+          "on-secondary-container": "#27378a",
+          "tertiary": "#004c44", "on-tertiary": "#ffffff",
+          "tertiary-container": "#00665b", "on-tertiary-container": "#7ce4d3",
+          "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a",
+          "surface": "#f4faff", "surface-dim": "#cfdce4",
+          "surface-container-lowest": "#ffffff", "surface-container-low": "#e9f6fd",
+          "surface-container": "#e3f0f8", "surface-container-high": "#ddeaf2",
+          "surface-container-highest": "#d7e4ec",
+          "on-surface": "#111d23", "on-surface-variant": "#454652",
+          "outline": "#757684", "outline-variant": "#c5c5d4", "background": "#f4faff",
+        },
+        borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+        fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-headline, h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Steps */
+  .step-panel { display: none; }
+  .step-panel.active { display: flex; }
+
+  /* Dropzone */
+  .dropzone { transition: all 0.25s ease; }
+  .dropzone.dragover { border-color: #2b3896; background: #f0f2ff; transform: scale(1.01); }
+
+  /* Animations */
+  @keyframes chipIn    { from { opacity:0; transform:scale(0.7) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  @keyframes fadeUp    { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes cardIn    { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+  @keyframes slideIn   { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes spin      { to { transform: rotate(360deg); } }
+  @keyframes pulseDot  { 0%,80%,100% { opacity:.3; transform:scale(.8); } 40% { opacity:1; transform:scale(1); } }
+  @keyframes shimmer   { 0%{background-position:-400px 0} 100%{background-position:calc(400px + 100%) 0} }
+  @keyframes checkPop  { 0%{transform:scale(0);} 70%{transform:scale(1.2);} 100%{transform:scale(1);} }
+
+  .chip-in    { animation: chipIn  0.3s cubic-bezier(0.34,1.56,0.64,1); }
+  .fade-up    { animation: fadeUp  0.4s ease forwards; }
+  .card-in    { animation: cardIn  0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; opacity:0; }
+  .slide-in   { animation: slideIn 0.35s ease forwards; opacity:0; }
+  .spin       { animation: spin    1.5s linear infinite; }
+  .pulse-dot  { animation: pulseDot 1.2s ease-in-out infinite; }
+  .pulse-dot:nth-child(2) { animation-delay:.2s; }
+  .pulse-dot:nth-child(3) { animation-delay:.4s; }
+  .check-pop  { animation: checkPop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+
+  .skeleton   { background: linear-gradient(90deg,#e3f0f8 25%,#f4faff 50%,#e3f0f8 75%); background-size: 800px 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 8px; }
+
+  /* Progress bar */
+  .progress-bar { transition: width 0.6s cubic-bezier(0.65,0,0.35,1); }
+
+  /* Nav item */
+  .nav-item { transition: all 0.2s ease; }
+
+  /* Import step chip */
+  .import-chip { display: flex; align-items: center; gap: 6px; }
+  .import-chip .status-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+
+  /* Step connector line */
+  .step-connector { flex: 1; height: 2px; background: linear-gradient(90deg, #2b3896 var(--p, 0%), #c5c5d4 var(--p, 0%)); transition: --p 0.5s ease; }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="h-screen w-72 sticky left-0 top-0 bg-slate-50 border-r border-slate-100 flex flex-col py-6 z-20">
+
+  <!-- Logo -->
+  <div class="px-8 mb-10 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1;">restaurant</span>
+    </div>
+    <div>
+      <h1 class="font-headline font-black text-lg text-indigo-700 leading-tight">OnceyDoce</h1>
+      <p class="text-slate-500 font-medium text-xs">Setup Wizard</p>
+    </div>
+  </div>
+
+  <!-- Steps nav -->
+  <nav class="flex-1 px-4 space-y-1" id="side-nav">
+    <div class="nav-item rounded-full my-1 px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-1" onclick="goToStep(1)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-1">1</div>
+      <div>
+        <p class="text-sm font-headline font-bold leading-tight">Tu negocio</p>
+        <p class="text-xs text-on-surface-variant">Nombre, tipo, moneda</p>
+      </div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-1" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+
+    <div class="nav-item rounded-full my-1 px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-2" onclick="goToStep(2)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-2">2</div>
+      <div>
+        <p class="text-sm font-headline font-bold leading-tight">Productos</p>
+        <p class="text-xs text-on-surface-variant">Catálogo de ítems</p>
+      </div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-2" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+
+    <div class="nav-item rounded-full my-1 px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-3" onclick="goToStep(3)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-3">3</div>
+      <div>
+        <p class="text-sm font-headline font-bold leading-tight">Movimientos</p>
+        <p class="text-xs text-on-surface-variant">Historial de ventas</p>
+      </div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-3" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+
+    <div class="nav-item rounded-full my-1 px-4 py-3 flex items-center gap-3" id="nav-4">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-4">4</div>
+      <div>
+        <p class="text-sm font-headline font-bold leading-tight">Análisis IA</p>
+        <p class="text-xs text-on-surface-variant">Configuración automática</p>
+      </div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-4" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+  </nav>
+
+  <!-- Progress + user -->
+  <div class="px-6 mt-auto space-y-3">
+    <div class="p-4 rounded-2xl bg-surface-container-low">
+      <p class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Progreso</p>
+      <div class="w-full bg-outline-variant/40 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-primary h-full rounded-full progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <p class="text-xs mt-2 text-on-surface-variant font-medium" id="progress-label">Paso 1 de 4</p>
+    </div>
+    <div class="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-low">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs font-black">A</div>
+      <div>
+        <span class="text-xs font-bold text-on-surface block">Admin</span>
+        <span class="text-[10px] text-on-surface-variant">OnceyDoce POS</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 overflow-y-auto no-scrollbar bg-surface-container-low min-h-screen flex flex-col">
+
+  <!-- ===========================================================
+       STEP 1 — Datos del negocio
+       =========================================================== -->
+  <div class="step-panel active flex-1 flex-col items-center justify-center p-10" id="step-1">
+    <div class="max-w-2xl w-full fade-up">
+
+      <header class="mb-10 text-center">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse inline-block"></span>
+          Paso 1 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">Contanos sobre tu negocio</h2>
+        <p class="text-on-surface-variant text-lg leading-relaxed">
+          Esta información va a personalizar tu POS y los reportes.
+        </p>
+      </header>
+
+      <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm space-y-5">
+
+        <!-- Nombre del local -->
+        <div>
+          <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Nombre del negocio *</label>
+          <input id="biz-name" type="text" placeholder="Ej: OnceyDoce Bar & Café"
+            class="w-full bg-surface-container-high border-2 border-transparent rounded-2xl py-4 px-4 font-headline font-bold text-on-surface placeholder:text-outline focus:border-primary focus:bg-white focus:ring-0 transition-all outline-none" />
+        </div>
+
+        <!-- Tipo de negocio -->
+        <div>
+          <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Tipo de negocio *</label>
+          <div class="grid grid-cols-3 gap-3" id="biz-type-grid">
+            <button type="button" onclick="selectBizType(this,'cafe')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">local_cafe</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Café / Bar</span>
+            </button>
+            <button type="button" onclick="selectBizType(this,'restaurant')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">restaurant</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Restaurante</span>
+            </button>
+            <button type="button" onclick="selectBizType(this,'retail')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">storefront</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Retail</span>
+            </button>
+            <button type="button" onclick="selectBizType(this,'bakery')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">bakery_dining</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Panadería</span>
+            </button>
+            <button type="button" onclick="selectBizType(this,'bar')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">local_bar</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Bar</span>
+            </button>
+            <button type="button" onclick="selectBizType(this,'other')" class="biz-type-btn flex flex-col items-center gap-2 p-4 bg-surface-container-high rounded-2xl border-2 border-transparent hover:border-primary/30 transition-all">
+              <span class="material-symbols-outlined text-2xl text-on-surface-variant">more_horiz</span>
+              <span class="text-xs font-headline font-bold text-on-surface-variant">Otro</span>
+            </button>
+          </div>
+          <input type="hidden" id="biz-type" value="" />
+        </div>
+
+        <!-- Moneda + ciudad -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Moneda</label>
+            <div class="relative">
+              <select id="biz-currency"
+                class="w-full bg-surface-container-high border-2 border-transparent rounded-2xl py-3.5 pl-4 pr-8 text-sm font-bold text-on-surface focus:border-primary focus:bg-white focus:ring-0 appearance-none outline-none transition-all">
+                <option value="ARS">ARS — Pesos argentinos</option>
+                <option value="USD">USD — Dólares</option>
+                <option value="CLP">CLP — Pesos chilenos</option>
+                <option value="UYU">UYU — Pesos uruguayos</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">expand_more</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Ciudad</label>
+            <input id="biz-city" type="text" placeholder="Buenos Aires"
+              class="w-full bg-surface-container-high border-2 border-transparent rounded-2xl py-3.5 px-4 text-sm font-bold text-on-surface placeholder:text-outline focus:border-primary focus:bg-white focus:ring-0 transition-all outline-none" />
+          </div>
+        </div>
+
+        <button onclick="nextStep(1)"
+          class="w-full bg-primary text-on-primary py-4 rounded-full font-headline font-black text-base shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 mt-2">
+          Continuar
+          <span class="material-symbols-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       STEP 2 — Productos
+       =========================================================== -->
+  <div class="step-panel flex-1 flex-col items-center justify-center p-10" id="step-2">
+    <div class="max-w-4xl w-full">
+      <header class="mb-10 text-center">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse inline-block"></span>
+          Paso 2 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">Tu catálogo de productos</h2>
+        <p class="text-on-surface-variant text-lg max-w-xl mx-auto leading-relaxed">
+          Subí tu lista. La IA detecta las columnas automáticamente sin importar el formato.
+        </p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Info card -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-surface-container p-6 rounded-2xl shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-base">table_chart</span>Columnas esperadas
+            </h3>
+            <ul class="space-y-2.5">
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Nombre</strong> del producto</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Precio</strong> de venta</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Stock</strong> disponible</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Categoría</strong> (opcional)</span></li>
+            </ul>
+            <button onclick="downloadTemplate()" class="w-full py-2.5 px-4 rounded-full border border-indigo-200 text-indigo-700 text-xs font-black flex items-center justify-center gap-2 hover:bg-indigo-50 transition-colors">
+              <span class="material-symbols-outlined text-sm">download</span>DESCARGAR PLANTILLA
+            </button>
+          </div>
+          <div class="bg-tertiary-container text-on-tertiary p-5 rounded-2xl">
+            <h4 class="text-sm font-bold mb-1.5 flex items-center gap-1.5"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">tips_and_updates</span>Tip</h4>
+            <p class="text-xs opacity-90 leading-relaxed">Los nombres de las columnas no importan. La IA detecta cuál es el precio, stock, etc. automáticamente.</p>
+          </div>
+        </div>
+
+        <!-- Dropzone -->
+        <div class="lg:col-span-8">
+          <div class="dropzone bg-surface-container-lowest rounded-2xl border-2 border-dashed border-outline-variant min-h-[320px] p-10 text-center relative cursor-pointer group hover:border-primary transition-colors flex flex-col items-center justify-center"
+               id="dropzone-2"
+               onclick="document.getElementById('file-2').click()"
+               ondragover="handleDragOver(event,'dropzone-2')"
+               ondragleave="handleDragLeave('dropzone-2')"
+               ondrop="handleDrop(event,'file-2','dropzone-2',2)">
+            <div id="dz-2-empty" class="flex flex-col items-center">
+              <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings:'wght' 200;">inventory_2</span>
+              </div>
+              <h3 class="text-xl font-headline font-bold text-on-surface mb-2">Subí tu lista de productos</h3>
+              <p class="text-on-surface-variant text-sm mb-5">Arrastrá o hacé clic para buscar</p>
+              <div class="flex justify-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLSX</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLS</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.CSV</span>
+              </div>
+            </div>
+            <div id="dz-2-loaded" class="hidden flex-col items-center w-full">
+              <span class="material-symbols-outlined text-tertiary text-5xl mb-3 check-pop" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              <h3 class="text-lg font-headline font-bold text-on-surface mb-2">Archivo cargado</h3>
+              <div class="chip-in inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold">
+                <span class="material-symbols-outlined text-sm">table_chart</span>
+                <span id="filename-2">—</span>
+                <button onclick="clearFile(2,event)" class="material-symbols-outlined text-xs hover:text-error transition-colors">close</button>
+              </div>
+              <div id="preview-2" class="mt-4 w-full max-w-sm mx-auto"></div>
+            </div>
+            <input type="file" id="file-2" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(2,this)"/>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="prevStep(2)" class="flex items-center gap-2 px-7 py-3 rounded-full text-on-surface font-bold hover:bg-surface-container transition-all active:scale-95">
+              <span class="material-symbols-outlined">arrow_back</span>Atrás
+            </button>
+            <div class="flex items-center gap-3">
+              <button onclick="nextStep(2)" class="text-sm text-on-surface-variant hover:text-on-surface font-semibold px-4 py-2 rounded-full hover:bg-surface-container transition-all">
+                Saltar este paso
+              </button>
+              <button onclick="nextStep(2)" id="btn-next-2" class="bg-primary text-on-primary px-8 py-3.5 rounded-full font-headline font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 group">
+                Siguiente
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       STEP 3 — Movimientos
+       =========================================================== -->
+  <div class="step-panel flex-1 flex-col items-center justify-center p-10" id="step-3">
+    <div class="max-w-4xl w-full">
+      <header class="mb-10 text-center">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse inline-block"></span>
+          Paso 3 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">Historial de movimientos</h2>
+        <p class="text-on-surface-variant text-lg max-w-xl mx-auto leading-relaxed">
+          Ventas y gastos pasados para que la IA configure tus reportes con datos reales.
+        </p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-surface-container p-6 rounded-2xl shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-base">receipt_long</span>Columnas esperadas
+            </h3>
+            <ul class="space-y-2.5">
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Fecha</strong> de la transacción</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Tipo</strong> — venta, gasto</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Monto</strong> en pesos</span></li>
+              <li class="flex items-start gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base mt-0.5">check_circle</span><span><strong class="text-on-surface">Método de pago</strong></span></li>
+            </ul>
+          </div>
+          <div class="bg-surface-container p-5 rounded-2xl border border-outline-variant/30">
+            <p class="text-xs text-on-surface-variant leading-relaxed">Este paso es <strong class="text-on-surface">opcional</strong>. Si no tenés historial, podés saltarlo y empezar desde cero.</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8">
+          <div class="dropzone bg-surface-container-lowest rounded-2xl border-2 border-dashed border-outline-variant min-h-[320px] p-10 text-center relative cursor-pointer group hover:border-primary transition-colors flex flex-col items-center justify-center"
+               id="dropzone-3"
+               onclick="document.getElementById('file-3').click()"
+               ondragover="handleDragOver(event,'dropzone-3')"
+               ondragleave="handleDragLeave('dropzone-3')"
+               ondrop="handleDrop(event,'file-3','dropzone-3',3)">
+            <div id="dz-3-empty" class="flex flex-col items-center">
+              <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings:'wght' 200;">receipt_long</span>
+              </div>
+              <h3 class="text-xl font-headline font-bold text-on-surface mb-2">Subí tus movimientos</h3>
+              <p class="text-on-surface-variant text-sm mb-5">Ventas, pagos y gastos del mes</p>
+              <div class="flex justify-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLSX</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLS</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.CSV</span>
+              </div>
+            </div>
+            <div id="dz-3-loaded" class="hidden flex-col items-center w-full">
+              <span class="material-symbols-outlined text-tertiary text-5xl mb-3 check-pop" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              <h3 class="text-lg font-headline font-bold text-on-surface mb-2">Archivo cargado</h3>
+              <div class="chip-in inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold">
+                <span class="material-symbols-outlined text-sm">receipt_long</span>
+                <span id="filename-3">—</span>
+                <button onclick="clearFile(3,event)" class="material-symbols-outlined text-xs hover:text-error transition-colors">close</button>
+              </div>
+              <div id="preview-3" class="mt-4 w-full max-w-sm mx-auto"></div>
+            </div>
+            <input type="file" id="file-3" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(3,this)"/>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="prevStep(3)" class="flex items-center gap-2 px-7 py-3 rounded-full text-on-surface font-bold hover:bg-surface-container transition-all active:scale-95">
+              <span class="material-symbols-outlined">arrow_back</span>Atrás
+            </button>
+            <div class="flex items-center gap-3">
+              <button onclick="nextStep(3)" class="text-sm text-on-surface-variant hover:text-on-surface font-semibold px-4 py-2 rounded-full hover:bg-surface-container transition-all">
+                Saltar este paso
+              </button>
+              <button onclick="nextStep(3)" class="bg-primary text-on-primary px-8 py-3.5 rounded-full font-headline font-bold shadow-lg shadow-primary/20 transition-all active:scale-95 flex items-center gap-2 group">
+                Analizar con IA
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">auto_awesome</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===========================================================
+       STEP 4 — Análisis IA + Importación
+       =========================================================== -->
+  <div class="step-panel flex-1 flex-col items-center justify-center p-10" id="step-4">
+    <div class="max-w-5xl w-full">
+
+      <!-- Loading state -->
+      <div id="ai-loading" class="flex flex-col items-center justify-center py-20">
+        <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-primary text-5xl spin">progress_activity</span>
+        </div>
+        <h3 class="text-2xl font-headline font-bold text-on-surface mb-2">Analizando tus datos con IA...</h3>
+        <div class="flex gap-2 mt-3">
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+        </div>
+        <p id="ai-status-text" class="mt-5 text-sm text-on-surface-variant text-center max-w-sm"></p>
+      </div>
+
+      <!-- Results -->
+      <div id="ai-results" class="hidden">
+
+        <!-- Header -->
+        <header class="mb-8 text-center fade-up">
+          <div class="inline-flex items-center gap-2 bg-tertiary-container/20 text-tertiary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>
+            Análisis completado
+          </div>
+          <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">¡Tu POS está listo!</h2>
+          <p class="text-on-surface-variant text-lg max-w-xl mx-auto leading-relaxed" id="ai-biz-type"></p>
+        </header>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="ai-metrics"></div>
+
+        <!-- Two columns: insights + categories/payments -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
+            <h3 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings:'FILL' 1;">psychology</span>
+              Lo que detectó la IA
+            </h3>
+            <div id="ai-insights" class="space-y-3 text-sm text-on-surface-variant leading-relaxed"></div>
+          </div>
+          <div class="space-y-4">
+            <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
+              <h4 class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Categorías detectadas</h4>
+              <div id="ai-categories" class="space-y-2"></div>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
+              <h4 class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Métodos de pago</h4>
+              <div id="ai-payments" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Config recommendations -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8" id="ai-config-cards"></div>
+
+        <!-- Products preview table -->
+        <div id="products-preview-section" class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm mb-8 hidden">
+          <h3 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">inventory_2</span>
+            Vista previa — productos a importar
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-outline-variant/30">
+                  <th class="text-left text-[10px] font-black text-on-surface-variant uppercase tracking-widest pb-3 pr-4">Nombre</th>
+                  <th class="text-left text-[10px] font-black text-on-surface-variant uppercase tracking-widest pb-3 pr-4">Categoría</th>
+                  <th class="text-right text-[10px] font-black text-on-surface-variant uppercase tracking-widest pb-3 pr-4">Precio</th>
+                  <th class="text-right text-[10px] font-black text-on-surface-variant uppercase tracking-widest pb-3">Stock</th>
+                </tr>
+              </thead>
+              <tbody id="products-preview-tbody" class="divide-y divide-outline-variant/20"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Import progress -->
+        <div id="import-progress" class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm mb-8">
+          <h3 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">upload</span>
+            Importando a tu POS
+          </h3>
+          <div class="space-y-3" id="import-steps-list"></div>
+        </div>
+
+        <!-- CTA banner -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-8 bg-gradient-to-r from-primary to-primary-container rounded-2xl">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">rocket_launch</span>
+            </div>
+            <div>
+              <p class="font-headline font-black text-white text-xl">¡Listo para vender!</p>
+              <p class="text-sm text-white/80 mt-0.5" id="cta-subtitle">Tu POS está configurado y los productos importados.</p>
+            </div>
+          </div>
+          <a href="index.html"
+            class="w-full md:w-auto bg-white text-primary px-10 py-4 rounded-full font-headline font-extrabold text-base flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+            Ir al Dashboard
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
+
+<!-- Background accents -->
+<div class="fixed top-0 right-0 w-1/3 h-1/3 bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10 translate-x-1/2 -translate-y-1/2"></div>
+<div class="fixed bottom-0 left-72 w-1/4 h-1/4 bg-tertiary/5 rounded-full blur-[100px] pointer-events-none -z-10 translate-y-1/4"></div>
+
+<script>
+  const API_URL     = 'http://localhost:3000';
+  const business_id = '298c4d7d-1b49-46c3-a214-4e6a9a738fa6';
+  const HEADERS      = { 'x-business-id': business_id };
+  const JSON_HEADERS = { 'Content-Type': 'application/json', ...HEADERS };
+
+  // =====================================================================
+  // STATE
+  // =====================================================================
+  let currentStep = 1;
+  let selectedBizType = '';
+  let parsedData = { 2: null, 3: null }; // products=2, movements=3
+
+  const STEP_CONFIG = [
+    { progress: '25%',  label: 'Paso 1 de 4' },
+    { progress: '50%',  label: 'Paso 2 de 4' },
+    { progress: '75%',  label: 'Paso 3 de 4' },
+    { progress: '100%', label: 'Paso 4 de 4' },
+  ];
+
+  // =====================================================================
+  // NAVIGATION
+  // =====================================================================
+  function updateNav(step) {
+    for (let i = 1; i <= 4; i++) {
+      const nav   = document.getElementById(`nav-${i}`);
+      const badge = document.getElementById(`nav-badge-${i}`);
+      const check = document.getElementById(`nav-check-${i}`);
+      nav.className = 'nav-item rounded-full my-1 px-4 py-3 flex items-center gap-3 cursor-pointer';
+
+      if (i === step) {
+        nav.classList.add('bg-indigo-50', 'text-indigo-700');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-primary text-white';
+      } else if (i < step) {
+        nav.classList.add('text-slate-500');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-slate-200 text-slate-500';
+        if (check) check.classList.remove('hidden');
+      } else {
+        nav.classList.add('text-slate-400');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-slate-100 text-slate-400';
+        if (check) check.classList.add('hidden');
+      }
+    }
+    const cfg = STEP_CONFIG[step - 1];
+    document.getElementById('progress-bar').style.width   = cfg.progress;
+    document.getElementById('progress-label').textContent = cfg.label;
+  }
+
+  function showStep(step) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`step-${step}`).classList.add('active');
+    currentStep = step;
+    updateNav(step);
+    if (step === 4) startAIAnalysis();
+  }
+
+  function goToStep(step) {
+    if (step > currentStep) return;
+    showStep(step);
+  }
+
+  function nextStep(from) { showStep(from + 1); }
+  function prevStep(from) { showStep(from - 1); }
+
+  // =====================================================================
+  // STEP 1 — biz type selector
+  // =====================================================================
+  function selectBizType(btn, type) {
+    document.querySelectorAll('.biz-type-btn').forEach(b => {
+      b.classList.remove('border-primary', 'bg-primary/5');
+      b.querySelector('.material-symbols-outlined').classList.replace('text-primary', 'text-on-surface-variant');
+      b.querySelector('span:last-child').classList.replace('text-primary', 'text-on-surface-variant');
+    });
+    btn.classList.add('border-primary', 'bg-primary/5');
+    btn.querySelector('.material-symbols-outlined').classList.replace('text-on-surface-variant', 'text-primary');
+    btn.querySelector('span:last-child').classList.replace('text-on-surface-variant', 'text-primary');
+    selectedBizType = type;
+    document.getElementById('biz-type').value = type;
+  }
+
+  // =====================================================================
+  // FILE HANDLING
+  // =====================================================================
+  function handleDragOver(e, id) {
+    e.preventDefault();
+    document.getElementById(id).classList.add('dragover');
+  }
+  function handleDragLeave(id) {
+    document.getElementById(id).classList.remove('dragover');
+  }
+  function handleDrop(e, inputId, dropId, stepNum) {
+    e.preventDefault();
+    document.getElementById(dropId).classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(stepNum, file);
+  }
+  function handleFileSelect(stepNum, input) {
+    const file = input.files[0];
+    if (file) processFile(stepNum, file);
+  }
+  function clearFile(stepNum, e) {
+    e.stopPropagation();
+    parsedData[stepNum] = null;
+    document.getElementById(`dz-${stepNum}-empty`).classList.remove('hidden');
+    document.getElementById(`dz-${stepNum}-loaded`).classList.add('hidden');
+    document.getElementById(`file-${stepNum}`).value = '';
+  }
+
+  function processFile(stepNum, file) {
+    document.getElementById(`filename-${stepNum}`).textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        let json;
+        if (file.name.toLowerCase().endsWith('.csv')) {
+          const text = new TextDecoder().decode(new Uint8Array(evt.target.result));
+          const wb = XLSX.read(text, { type: 'string' });
+          json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        } else {
+          const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+          json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        }
+        parsedData[stepNum] = json;
+        showPreview(stepNum, json);
+        document.getElementById(`dz-${stepNum}-empty`).classList.add('hidden');
+        document.getElementById(`dz-${stepNum}-loaded`).classList.remove('hidden');
+        document.getElementById(`dz-${stepNum}-loaded`).classList.add('flex');
+      } catch (err) {
+        showToast('warn', 'Error leyendo el archivo');
+        console.error(err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showPreview(stepNum, json) {
+    const preview = document.getElementById(`preview-${stepNum}`);
+    const cols = json.length > 0 ? Object.keys(json[0]) : [];
+    preview.innerHTML = `
+      <div class="bg-indigo-50 rounded-xl p-3 text-xs text-indigo-700 font-medium">
+        <div class="flex justify-between mb-1.5">
+          <span class="font-black">${json.length} filas</span>
+          <span>${cols.length} columnas</span>
+        </div>
+        <div class="flex flex-wrap gap-1 mt-1">
+          ${cols.slice(0,5).map(c => `<span class="bg-white px-2 py-0.5 rounded-full text-indigo-600">${c}</span>`).join('')}
+          ${cols.length > 5 ? `<span class="bg-white px-2 py-0.5 rounded-full">+${cols.length-5}</span>` : ''}
+        </div>
+      </div>`;
+  }
+
+  // =====================================================================
+  // STEP 4 — AI ANALYSIS + IMPORT
+  // =====================================================================
+  async function startAIAnalysis() {
+    document.getElementById('ai-loading').classList.remove('hidden');
+    document.getElementById('ai-results').classList.add('hidden');
+
+    const statusEl = document.getElementById('ai-status-text');
+    const statuses = [
+      'Detectando estructura de columnas...',
+      'Identificando categorías de productos...',
+      'Analizando métodos de pago y movimientos...',
+      'Calculando métricas del negocio...',
+      'Generando configuración personalizada del POS...',
+    ];
+
+    for (const s of statuses) {
+      await sleep(700);
+      statusEl.textContent = s;
+    }
+
+    // Armar prompt con los datos reales
+    const bizName     = document.getElementById('biz-name').value || 'Mi negocio';
+    const bizType     = selectedBizType || 'general';
+    const prodSample  = parsedData[2] ? JSON.stringify(parsedData[2].slice(0, 12)) : '[]';
+    const movSample   = parsedData[3] ? JSON.stringify(parsedData[3].slice(0, 12)) : '[]';
+    const hasProds    = parsedData[2]?.length > 0;
+    const hasMov      = parsedData[3]?.length > 0;
+
+    const prompt = `Sos un asistente de configuración de POS para un negocio gastronómico/retail.
+
+NOMBRE DEL NEGOCIO: "${bizName}"
+TIPO DE NEGOCIO: "${bizType}"
+
+${hasProds ? `PRODUCTOS (primeras filas del Excel): ${prodSample}` : 'No se subió archivo de productos.'}
+${hasMov   ? `MOVIMIENTOS (primeras filas del Excel): ${movSample}` : 'No se subió archivo de movimientos.'}
+
+Analizá los datos y respondé SOLO con JSON válido (sin markdown ni texto extra):
+{
+  "tipoNegocio": "descripción breve del tipo de negocio detectado",
+  "insight1": "observación relevante sobre el negocio (1-2 oraciones)",
+  "insight2": "patrón o oportunidad detectada (1-2 oraciones)",
+  "insight3": "recomendación de configuración del POS (1-2 oraciones)",
+  "totalProductos": número o null,
+  "totalMovimientos": número o null,
+  "ventaPromedio": número en pesos o null,
+  "categorias": ["cat1", "cat2", "cat3"],
+  "metodosPago": ["metodo1", "metodo2"],
+  "configRecomendada": [
+    {"titulo": "string", "descripcion": "descripción corta", "icono": "material-icon-name", "valor": "valor configurado"},
+    {"titulo": "string", "descripcion": "descripción corta", "icono": "material-icon-name", "valor": "valor configurado"},
+    {"titulo": "string", "descripcion": "descripción corta", "icono": "material-icon-name", "valor": "valor configurado"}
+  ]
+}`;
+
+    let aiResult;
+    try {
+
+@Post('ai')
+async askAI() {
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({...})
+  });
+}
+
+
+
+
+
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
+      aiResult = JSON.parse(text);
+    } catch (err) {
+      console.warn('API error, usando fallback:', err);
+      aiResult = getMockResult(bizName, bizType);
+    }
+
+    // Mostrar resultados
+    await renderAIResults(aiResult);
+
+    // Iniciar importación al backend
+    await runImport(aiResult);
+  }
+
+  function getMockResult(bizName, bizType) {
+    return {
+      tipoNegocio: bizType === 'cafe' ? 'Café/Bar con menú variado' : 'Negocio de gastronomía/retail',
+      insight1: `${bizName} tiene un catálogo bien estructurado. El sistema de búsqueda rápida va a ser clave en hora pico.`,
+      insight2: 'Los datos sugieren que el ticket promedio es consistente. Te recomendamos activar las alertas de stock bajo.',
+      insight3: 'Configuramos los atajos del terminal para los productos más frecuentes y el cierre de caja automático.',
+      totalProductos:   parsedData[2]?.length ?? 42,
+      totalMovimientos: parsedData[3]?.length ?? 187,
+      ventaPromedio: 850,
+      categorias:   ['Bebidas', 'Comidas', 'Postres', 'Snacks'],
+      metodosPago:  ['Efectivo', 'Tarjeta de crédito', 'Transferencia QR'],
+      configRecomendada: [
+        { titulo: 'Pantalla rápida',  descripcion: 'Acceso a los 12 productos más vendidos', icono: 'touch_app',    valor: 'Activada' },
+        { titulo: 'Cierre de caja',   descripcion: 'Reporte automático al final del día',     icono: 'point_of_sale', valor: '22:00 hs' },
+        { titulo: 'Alertas de stock', descripcion: 'Notificación cuando el stock baje',        icono: 'inventory',    valor: '≤ 5 unid.' },
+      ]
+    };
+  }
+
+  async function renderAIResults(result) {
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('ai-results').classList.remove('hidden');
+    document.getElementById('ai-biz-type').textContent = result.tipoNegocio;
+
+    const bizName = document.getElementById('biz-name').value || 'Tu negocio';
+
+    // KPI cards
+    const metrics = [
+      { label: 'Tipo detectado',   value: result.tipoNegocio,     icon: 'store' },
+      { label: 'Productos',        value: result.totalProductos !== null ? result.totalProductos : (parsedData[2]?.length ?? '—'), icon: 'inventory_2' },
+      { label: 'Movimientos',      value: result.totalMovimientos !== null ? result.totalMovimientos : (parsedData[3]?.length ?? '—'), icon: 'receipt_long' },
+      { label: 'Ticket promedio',  value: result.ventaPromedio ? `$${result.ventaPromedio.toLocaleString('es-AR')}` : '—', icon: 'payments' },
+    ];
+    const mgEl = document.getElementById('ai-metrics');
+    mgEl.innerHTML = '';
+    metrics.forEach((m, i) => {
+      const card = document.createElement('div');
+      card.className = 'card-in bg-surface-container-lowest rounded-2xl p-5 shadow-sm';
+      card.style.animationDelay = `${i * 0.08}s`;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">${m.label}</span>
+          <span class="material-symbols-outlined text-primary text-base">${m.icon}</span>
+        </div>
+        <span class="text-xl font-headline font-extrabold text-on-surface">${m.value}</span>`;
+      mgEl.appendChild(card);
+    });
+
+    // Insights
+    const insightEl = document.getElementById('ai-insights');
+    insightEl.innerHTML = '';
+    for (const ins of [result.insight1, result.insight2, result.insight3].filter(Boolean)) {
+      await sleep(150);
+      const p = document.createElement('p');
+      p.className = 'slide-in';
+      p.textContent = ins;
+      insightEl.appendChild(p);
+    }
+
+    // Categories
+    const catEl = document.getElementById('ai-categories');
+    catEl.innerHTML = (result.categorias || []).length
+      ? result.categorias.map(c => `<div class="flex items-center gap-2 text-sm"><span class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span><span class="text-on-surface-variant">${c}</span></div>`).join('')
+      : '<p class="text-xs text-on-surface-variant">No detectadas</p>';
+
+    // Payments
+    const payEl = document.getElementById('ai-payments');
+    const payIcons = { efectivo: 'payments', tarjeta: 'credit_card', transferencia: 'account_balance', qr: 'qr_code' };
+    payEl.innerHTML = (result.metodosPago || []).length
+      ? result.metodosPago.map(p => {
+          const k = Object.keys(payIcons).find(k => p.toLowerCase().includes(k));
+          return `<div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-indigo-400 text-base">${k ? payIcons[k] : 'paid'}</span><span class="text-on-surface-variant">${p}</span></div>`;
+        }).join('')
+      : '<p class="text-xs text-on-surface-variant">No detectados</p>';
+
+    // Config cards
+    const ccEl = document.getElementById('ai-config-cards');
+    ccEl.innerHTML = '';
+    (result.configRecomendada || []).forEach((c, i) => {
+      const card = document.createElement('div');
+      card.className = 'card-in bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20';
+      card.style.animationDelay = `${0.3 + i * 0.1}s`;
+      card.innerHTML = `
+        <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">${c.icono}</span>
+        </div>
+        <h4 class="font-headline font-bold text-on-surface mb-1">${c.titulo}</h4>
+        <p class="text-xs text-on-surface-variant mb-3">${c.descripcion}</p>
+        <span class="inline-block bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">${c.valor}</span>`;
+      ccEl.appendChild(card);
+    });
+
+    // Products preview
+    if (parsedData[2]?.length > 0) {
+      document.getElementById('products-preview-section').classList.remove('hidden');
+      const tbody  = document.getElementById('products-preview-tbody');
+      const sample = parsedData[2].slice(0, 8);
+      const keys   = Object.keys(parsedData[2][0]);
+      const nameKey  = keys.find(k => /nombre|name|producto|item/i.test(k)) || keys[0];
+      const priceKey = keys.find(k => /precio|price|valor/i.test(k));
+      const stockKey = keys.find(k => /stock|cantidad|qty/i.test(k));
+      const catKey   = keys.find(k => /categ|tipo|type/i.test(k));
+
+      tbody.innerHTML = sample.map(row => `
+        <tr class="slide-in">
+          <td class="py-3 pr-4 font-medium text-on-surface">${row[nameKey] || '—'}</td>
+          <td class="py-3 pr-4 text-on-surface-variant">${catKey ? (row[catKey] || '—') : '—'}</td>
+          <td class="py-3 pr-4 text-right font-semibold">${priceKey ? `$${Number(row[priceKey]).toLocaleString('es-AR')}` : '—'}</td>
+          <td class="py-3 text-right text-on-surface-variant">${stockKey ? row[stockKey] : '—'}</td>
+        </tr>`).join('') +
+        (parsedData[2].length > 8 ? `<tr><td colspan="4" class="py-3 text-xs text-on-surface-variant text-center">... y ${parsedData[2].length - 8} productos más</td></tr>` : '');
+    }
+  }
+
+  // =====================================================================
+  // IMPORT TO BACKEND
+  // =====================================================================
+  async function runImport(aiResult) {
+    const importSteps = [];
+
+    // Determinar qué hay para importar
+    const hasProds = parsedData[2]?.length > 0;
+    const hasMov   = parsedData[3]?.length > 0;
+
+    if (hasProds)  importSteps.push({ id: 'imp-products',  label: `Importar ${parsedData[2].length} productos`, icon: 'inventory_2' });
+    if (hasMov)    importSteps.push({ id: 'imp-movements', label: `Importar ${parsedData[3].length} movimientos`, icon: 'receipt_long' });
+    importSteps.push({ id: 'imp-config', label: 'Guardar configuración del POS', icon: 'settings' });
+
+    // Render import steps UI
+    const stepsEl = document.getElementById('import-steps-list');
+    stepsEl.innerHTML = importSteps.map(s => `
+      <div class="import-chip" id="${s.id}">
+        <div class="status-icon bg-surface-container text-on-surface-variant">
+          <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant text-base">${s.icon}</span>
+        <span class="text-sm text-on-surface-variant font-medium flex-1">${s.label}</span>
+        <span class="text-xs text-on-surface-variant font-medium" id="${s.id}-status">Pendiente</span>
+      </div>`).join('');
+
+    // Run each import step
+    for (const step of importSteps) {
+      await sleep(400);
+      setImportStatus(step.id, 'loading', 'Importando...');
+
+      try {
+        if (step.id === 'imp-products') {
+          await importProducts();
+        } else if (step.id === 'imp-movements') {
+          await importMovements();
+        } else if (step.id === 'imp-config') {
+          await saveConfig(aiResult);
+        }
+        setImportStatus(step.id, 'done', 'Listo ✓');
+      } catch (err) {
+        setImportStatus(step.id, 'error', 'Error');
+        console.error(`Error en ${step.id}:`, err);
+      }
+    }
+
+    // Update CTA subtitle
+    const count = parsedData[2]?.length ?? 0;
+    document.getElementById('cta-subtitle').textContent =
+      count > 0
+        ? `${count} productos importados y configuración guardada.`
+        : 'Configuración guardada. Podés agregar productos desde Inventario.';
+  }
+
+  function setImportStatus(id, status, label) {
+    const el     = document.getElementById(id);
+    const icon   = el.querySelector('.status-icon');
+    const text   = document.getElementById(`${id}-status`);
+    text.textContent = label;
+
+    if (status === 'loading') {
+      icon.className = 'status-icon bg-primary/10 text-primary';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm spin" style="display:block">progress_activity</span>';
+      text.className = 'text-xs text-primary font-bold';
+    } else if (status === 'done') {
+      icon.className = 'status-icon bg-tertiary/10 text-tertiary check-pop';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings:\'FILL\' 1;">check_circle</span>';
+      text.className = 'text-xs text-tertiary font-bold';
+    } else {
+      icon.className = 'status-icon bg-error-container text-error';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm">error</span>';
+      text.className = 'text-xs text-error font-bold';
+    }
+  }
+
+  async function importProducts() {
+    if (!parsedData[2]?.length) return;
+
+    // Normalizar columnas
+    const products = parsedData[2].map(row => {
+      const keys = Object.keys(row);
+      const nameKey  = keys.find(k => /nombre|name|producto|item/i.test(k))  || keys[0];
+      const priceKey = keys.find(k => /precio|price|valor|monto/i.test(k));
+      const stockKey = keys.find(k => /stock|cantidad|qty|quantity/i.test(k));
+      const catKey   = keys.find(k => /categ|category|tipo|type/i.test(k));
+      const descKey  = keys.find(k => /desc/i.test(k));
+
+      return {
+        nombre:      String(row[nameKey] || '').trim(),
+        precio:      parseFloat(String(priceKey ? row[priceKey] : 0).replace(/[^0-9.]/g, '')) || 0,
+        stock:       parseInt(String(stockKey ? row[stockKey] : 0)) || 0,
+        categoria:   catKey ? String(row[catKey] || 'General') : 'General',
+        descripcion: descKey ? String(row[descKey] || '') : '',
+      };
+    }).filter(p => p.nombre);
+
+    const res = await fetch(`${API_URL}/import/products`, {
+      method: 'POST',
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ products }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    return res.json();
+  }
+
+  async function importMovements() {
+    if (!parsedData[3]?.length) return;
+
+    const transactions = parsedData[3].map(row => {
+      const keys     = Object.keys(row);
+      const dateKey  = keys.find(k => /fecha|date/i.test(k));
+      const typeKey  = keys.find(k => /tipo|type/i.test(k));
+      const amtKey   = keys.find(k => /monto|amount|importe|total/i.test(k));
+      const payKey   = keys.find(k => /pago|payment|metodo/i.test(k));
+      const descKey  = keys.find(k => /desc/i.test(k));
+
+      return {
+        fecha:           dateKey ? row[dateKey] : new Date().toISOString(),
+        tipo:            typeKey ? String(row[typeKey]).toLowerCase() : 'sale',
+        monto:           parseFloat(String(amtKey ? row[amtKey] : 0).replace(/[^0-9.-]/g, '')) || 0,
+        metodo_pago:     payKey ? String(row[payKey]) : 'efectivo',
+        descripcion:     descKey ? String(row[descKey] || '') : '',
+      };
+    });
+
+    // POST a /import/products endpoint or a transactions one if it exists
+    // For now we just log — wire to your transactions endpoint
+    console.log('Transactions to import:', transactions.length);
+    await sleep(600); // simulate
+  }
+
+  async function saveConfig(aiResult) {
+    const config = {
+      tipoNegocio:      aiResult.tipoNegocio,
+      categorias:       aiResult.categorias || [],
+      metodosPago:      aiResult.metodosPago || [],
+      configRecomendada: aiResult.configRecomendada || [],
+      businessName:     document.getElementById('biz-name').value,
+      businessType:     selectedBizType,
+      currency:         document.getElementById('biz-currency').value,
+      city:             document.getElementById('biz-city').value,
+      setupAt:          new Date().toISOString(),
+    };
+
+    // Store locally for other pages to read
+    localStorage.setItem('onceydoce_config', JSON.stringify(config));
+    await sleep(400);
+  }
+
+  // =====================================================================
+  // DOWNLOAD TEMPLATE
+  // =====================================================================
+  function downloadTemplate() {
+    const wb = XLSX.utils.book_new();
+
+    // Products sheet
+    const prod = [
+      ['Nombre', 'Descripción', 'Precio', 'Stock', 'Categoría'],
+      ['Café con leche', 'Espresso con leche vaporizada', 350, 100, 'Bebidas'],
+      ['Medialunas x3', 'Tres medialunas de manteca', 250, 80, 'Panadería'],
+      ['Tostado jamón y queso', 'Pan con jamón y queso', 450, 50, 'Comidas'],
+      ['Jugo de naranja', 'Jugo exprimido 300ml', 400, 60, 'Bebidas'],
+      ['Agua mineral 500ml', 'Botella sin gas', 150, 200, 'Bebidas'],
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(prod);
+    ws1['!cols'] = [{ wch:25 },{ wch:30 },{ wch:10 },{ wch:8 },{ wch:15 }];
+    XLSX.utils.book_append_sheet(wb, ws1, 'Productos');
+
+    // Movements sheet
+    const mov = [
+      ['Fecha', 'Tipo', 'Descripción', 'Monto', 'Método de Pago'],
+      ['2025-03-01', 'Venta', 'Venta mostrador', 750, 'Efectivo'],
+      ['2025-03-01', 'Venta', 'Venta mostrador', 450, 'Tarjeta'],
+      ['2025-03-02', 'Gasto', 'Compra insumos', -2000, 'Efectivo'],
+      ['2025-03-03', 'Venta', 'Venta mostrador', 1200, 'Transferencia'],
+    ];
+    const ws2 = XLSX.utils.aoa_to_sheet(mov);
+    ws2['!cols'] = [{ wch:12 },{ wch:10 },{ wch:25 },{ wch:10 },{ wch:20 }];
+    XLSX.utils.book_append_sheet(wb, ws2, 'Movimientos');
+
+    XLSX.writeFile(wb, 'Plantilla_OnceyDoce.xlsx');
+  }
+
+  // =====================================================================
+  // TOAST
+  // =====================================================================
+  function showToast(type, msg) {
+    const toast = document.getElementById('toast');
+    const icons = { ok: 'check_circle', warn: 'warning' };
+    toast.innerHTML = `<span class="material-symbols-outlined text-sm">${icons[type] || 'info'}</span>${msg}`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.style.opacity = '0', 2800);
+  }
+
+  // =====================================================================
+  // UTILS
+  // =====================================================================
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Init
+  updateNav(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnceyDoce — Mesas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script id="tailwind-config">
+    
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2b3896",
+          "on-primary": "#ffffff",
+          "primary-container": "#4551af",
+          "on-primary-container": "#cbcfff",
+          "secondary": "#4858ab",
+          "secondary-container": "#96a5ff",
+          "on-secondary-container": "#27378a",
+          "tertiary": "#004c44",
+          "on-tertiary": "#ffffff",
+          "tertiary-container": "#00665b",
+          "on-tertiary-container": "#7ce4d3",
+          "error": "#ba1a1a",
+          "error-container": "#ffdad6",
+          "on-error-container": "#93000a",
+          "surface": "#f4faff",
+          "surface-dim": "#cfdce4",
+          "surface-bright": "#f4faff",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-low": "#e9f6fd",
+          "surface-container": "#e3f0f8",
+          "surface-container-high": "#ddeaf2",
+          "surface-container-highest": "#d7e4ec",
+          "surface-variant": "#d7e4ec",
+          "on-surface": "#111d23",
+          "on-surface-variant": "#454652",
+          "outline": "#757684",
+          "outline-variant": "#c5c5d4",
+          "background": "#f4faff",
+        },
+        borderRadius: {
+          "DEFAULT": "1rem",
+          "lg": "2rem",
+          "xl": "3rem",
+          "full": "9999px"
+        },
+        fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-headline, h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c5c5d4; border-radius: 10px; }
+
+  #cart-drawer   { transition: transform 0.32s cubic-bezier(0.4,0,0.2,1); }
+#products-panel { 
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1); 
+  right: 0;
+}
+  #drawer-backdrop { transition: opacity 0.25s ease; }
+
+  .table-card { transition: all 0.2s cubic-bezier(0.4,0,0.2,1); }
+  .table-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px rgba(17,29,35,0.08); }
+
+  @keyframes pulse-dot { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+  .prod-card { transition: all 0.15s cubic-bezier(0.4,0,0.2,1); }
+  .prod-card:hover { box-shadow: 0 8px 24px rgba(17,29,35,0.08); }
+
+  @keyframes bounce-in { 0%{transform:scale(0.8);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+  .bounce-in { animation: bounce-in 0.2s ease-out; }
+
+  .cat-chip.active { background:#2b3896; color:#fff; box-shadow:0 4px 12px rgba(43,56,150,0.25); }
+</style>
+</head>
+<body class="bg-surface-dim text-on-surface antialiased">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 flex flex-col py-6 z-50">
+  <div class="px-6 mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <span class="material-symbols-outlined text-white">restaurant</span>
+    </div>
+    <div>
+      <h1 class="font-headline font-black text-xl text-indigo-700">OnceyDoce</h1>
+      <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Bar & Café</p>
+    </div>
+  </div>
+  <nav class="flex-1 space-y-1 px-2">
+    <a class="flex items-center gap-3 px-4 py-3 bg-white text-indigo-700 rounded-full font-bold shadow-sm" href="index.html">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">deck</span>
+      <span class="font-headline">Mesas</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="terminal">
+      <span class="material-symbols-outlined">point_of_sale</span>
+      <span class="font-headline">Terminal</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="analytics">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="font-headline">Reportes</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="list-prod">
+      <span class="material-symbols-outlined">inventory_2</span>
+      <span class="font-headline">Inventario</span>
+    </a>
+  </nav>
+  <div class="px-4 mt-auto">
+    <button onclick="openNewTableModal()" class="w-full bg-primary text-on-primary py-4 rounded-full font-headline font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all">
+      <span class="material-symbols-outlined">add</span>
+      Nueva Mesa
+    </button>
+  </div>
+</aside>
+
+<!-- ===== TOPBAR ===== -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-md border-b border-outline-variant/20 flex items-center justify-between px-8 z-40">
+  <div class="flex items-center gap-4">
+    <h2 class="text-lg font-headline font-bold text-on-surface">Salón Principal</h2>
+    <span id="active-badge" class="px-3 py-1 bg-tertiary/10 text-tertiary text-[10px] font-black rounded-full uppercase tracking-widest">0 mesas activas</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <button class="p-2 text-outline hover:text-primary hover:bg-surface-container-low rounded-full transition-all">
+      <span class="material-symbols-outlined">notifications</span>
+    </button>
+    <div class="w-px h-6 bg-outline-variant mx-1"></div>
+    <div class="relative" id="user-menu-wrap">
+      <button id="user-menu-btn" onclick="toggleUserMenu()"
+        class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-container-low rounded-full cursor-pointer transition-colors">
+        <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary text-xs font-bold" id="topbar-initial">U</div>
+        <span class="text-xs font-bold font-headline text-on-surface-variant" id="topbar-name">Usuario</span>
+        <span class="material-symbols-outlined text-outline text-sm">expand_more</span>
+      </button>
+      <div id="user-menu-dropdown"
+        class="hidden absolute right-0 top-10 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+        <div class="px-4 py-3 border-b border-slate-100">
+          <p class="text-xs font-bold text-slate-700 truncate" id="dropdown-name">Usuario</p>
+          <p class="text-[10px] text-slate-400 truncate" id="dropdown-email"></p>
+        </div>
+        <button onclick="doLogout()"
+          class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-colors text-sm font-bold">
+          <span class="material-symbols-outlined text-sm">logout</span>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="pt-16 ml-64 min-h-screen bg-surface-dim">
+  <div class="p-8 max-w-[1400px] mx-auto">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+      <div>
+        <h1 class="text-4xl font-headline font-extrabold tracking-tight text-on-surface mb-2">Floor Plan</h1>
+        <p class="text-on-surface-variant font-medium">Gestión de mesas en tiempo real</p>
+      </div>
+      <div class="flex p-1.5 bg-surface-container rounded-2xl shadow-inner">
+        <button class="px-5 py-2 bg-surface-container-lowest text-primary font-headline font-bold rounded-xl shadow-sm text-sm">Planta Baja</button>
+        <button class="px-5 py-2 text-on-surface-variant font-headline font-semibold hover:text-primary text-sm transition-all">Terraza</button>
+      </div>
+    </div>
+    <div id="tables-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+  </div>
+</main>
+
+<!-- ===== BACKDROP ===== -->
+<div id="drawer-backdrop" onclick="closeAll()"
+  class="fixed inset-0 bg-on-surface/30 backdrop-blur-sm z-[55] hidden pointer-events-none opacity-0 transition-opacity"></div>
+
+<!-- ================================================================
+     PRODUCTS PANEL — desliza desde la derecha, detrás del cart drawer
+     ============================================================== -->
+<aside id="products-panel"
+  class="fixed top-0 h-screen w-[520px] bg-surface z-[58] shadow-2xl flex flex-col translate-x-full">
+
+  <div class="px-6 py-5 border-b border-outline-variant/20 bg-surface-container-lowest flex-shrink-0">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="font-headline font-black text-lg text-on-surface">Agregar Productos</h2>
+        <p id="panel-table-label" class="text-xs text-on-surface-variant mt-0.5">—</p>
+      </div>
+      <button onclick="closeProductsPanel()" class="p-2 text-outline hover:text-on-surface hover:bg-surface-container rounded-full transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="relative mb-3">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+      <input id="panel-search" oninput="filterPanelProducts()" type="text" placeholder="Buscar producto..."
+        class="w-full bg-surface-container-high border-none rounded-full py-3 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none" />
+    </div>
+    <div id="panel-categories" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div>
+  </div>
+
+  <div id="panel-products" class="flex-1 overflow-y-auto p-5 no-scrollbar"></div>
+</aside>
+
+<!-- ================================================================
+     CART DRAWER — desliza desde el borde derecho
+     ============================================================== -->
+<aside id="cart-drawer"
+  class="fixed top-0 right-0 h-screen w-[400px] bg-surface-container-lowest z-[60] shadow-2xl flex flex-col translate-x-full">
+
+  <div class="px-6 py-5 border-b border-outline-variant/20 flex-shrink-0">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="font-headline font-black text-xl text-on-surface">Pedido Actual</h2>
+        <div class="flex gap-2 mt-2">
+          <span id="drawer-table-badge" class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">—</span>
+          <span id="drawer-order-id" class="bg-surface-container text-outline px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">#NUEVA</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button onclick="clearCart()" title="Limpiar pedido" class="text-error text-xs font-bold p-2 hover:bg-error-container/30 rounded-full transition-all">
+          <span class="material-symbols-outlined text-sm">delete</span>
+        </button>
+        <button onclick="closeAll()" class="p-2 text-outline hover:text-on-surface hover:bg-surface-container rounded-full transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toggle products panel -->
+    <button id="btn-toggle-products" onclick="toggleProductsPanel()"
+      class="w-full flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-headline font-bold transition-all border
+             bg-primary/5 hover:bg-primary/10 text-primary border-primary/20 hover:border-primary/40">
+      <span class="material-symbols-outlined text-sm">add_circle</span>
+      <span id="btn-add-label">Agregar productos</span>
+      <span id="btn-add-chevron" class="material-symbols-outlined text-sm" style="transition:transform 0.3s">chevron_left</span>
+    </button>
+  </div>
+
+  <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-4 no-scrollbar"></div>
+  <div id="cart-footer" class="p-6 bg-surface-container-low border-t border-outline-variant/20 rounded-tl-3xl flex-shrink-0"></div>
+</aside>
+
+<!-- ===== MODAL NUEVA MESA ===== -->
+<div id="modal-overlay" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-md shadow-2xl">
+    <h3 class="text-2xl font-headline font-black text-on-surface mb-6">Nueva Mesa</h3>
+    <div class="mb-6">
+      <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Nombre de la Mesa</label>
+      <input id="input-table-name" type="text" placeholder="Ej: Mesa 07, Barra 1, VIP..."
+        class="w-full px-4 py-3 bg-surface-container-high rounded-full border-none focus:ring-2 focus:ring-primary font-bold text-on-surface placeholder:text-outline outline-none" />
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeNewTableModal()" class="flex-1 py-3 font-bold text-outline hover:bg-surface-container rounded-full transition-all">Cancelar</button>
+      <button onclick="createNewTable()" class="flex-1 py-3 bg-primary text-on-primary font-headline font-bold rounded-full shadow-lg hover:opacity-90 active:scale-95 transition-all">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
+
+<script type="module">
+  import { Cart } from './src/components/Cart.js';
+
+  // --- SESIÓN ---
+  const token      = localStorage.getItem('od_token');
+  const businessId = localStorage.getItem('od_business_id');
+  if (!token || !businessId) { window.location.href = 'setup.html'; }
+
+  const API_URL      = 'http://localhost:3000';
+  const HEADERS      = { 'x-business-id': businessId, 'Authorization': `Bearer ${token}` };
+  const JSON_HEADERS = { 'Content-Type': 'application/json', ...HEADERS };
+
+  // --- STATE ---
+  let allProducts = [];
+  let panelCategory = 'Todos';
+  let panelOpen = false;
+  window._currentTable = null;
+  window._currentOrderId = null; // ID de la orden activa en Supabase
+
+  
+
+  // =====================================================================
+  // MESAS
+  // =====================================================================
+  async function loadActiveTables() {
+    try {
+      const res = await fetch(`${API_URL}/orders/active`, { headers: HEADERS });
+      if (!res.ok) throw new Error();
+      renderTables(await res.json());
+    } catch {
+      renderTables(DEMO_TABLES);
+    }
+  }
+function timeAgo(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMin / 60);
+
+  if (diffMin < 1) return 'Hace unos segundos';
+  if (diffMin < 60) return `Hace ${diffMin} minuto${diffMin !== 1 ? 's' : ''}`;
+  if (diffHours < 24) return `Hace ${diffHours} hora${diffHours !== 1 ? 's' : ''}`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `Hace ${diffDays} día${diffDays !== 1 ? 's' : ''}`;
+}
+
+  function renderTables(tables) {
+    
+    const grid = document.getElementById('tables-grid');
+    const occupied = tables.filter(t => t.total > 0);
+    document.getElementById('active-badge').textContent =
+      `${occupied.length} ${occupied.length === 1 ? 'mesa activa' : 'mesas activas'}`;
+
+    grid.innerHTML = tables.map(t => {
+      const occ = t.total > 0;
+      return `
+        <div onclick="window.openTableDetail('${t.table_id}')"
+             class="table-card group relative bg-surface-container-lowest rounded-2xl p-6 cursor-pointer overflow-hidden min-h-[200px] flex flex-col justify-between">
+          ${occ ? '<div class="absolute top-0 left-0 w-1.5 h-full bg-secondary-container rounded-l-2xl"></div>' : ''}
+          <div class="flex justify-between items-start">
+            <div class="w-14 h-14 rounded-2xl ${occ ? 'bg-primary/10' : 'bg-surface-container-high'} flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl ${occ ? 'text-primary' : 'text-outline'}">table_restaurant</span>
+            </div>
+            <div> 
+            <span class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+              ${occ ? 'bg-secondary-container/20 text-on-secondary-container' : 'bg-tertiary/10 text-tertiary'}">
+              ${occ
+                ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary-container pulse-dot"></span> Activa'
+                : '<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span> Libre'}
+            </span> 
+            <p class="text-xs text-on-surface mt-0.5 red">${occ ? `${timeAgo(t.created_at || '')} ` : 'Disponible'}</p>
+</div>
+          </div>
+          <div>
+            <h4 class="text-lg font-headline font-extrabold text-on-surface mt-4">${t.table_id}</h4>
+            <p class="text-sm text-on-surface-variant mt-0.5">${occ ? `${t.item_count || ''} productos` : 'Disponible'}</p>
+            
+          </div>
+          <div class="flex justify-between items-center pt-4 border-t border-outline-variant/20 mt-4">
+            <span class="font-headline font-black ${occ ? 'text-primary text-lg' : 'text-outline text-sm'}">
+              ${occ ? `$${t.total.toLocaleString('es-AR')}` : '—'}
+            </span>
+            <span class="material-symbols-outlined ${occ ? 'text-secondary' : 'text-outline'} group-hover:text-primary transition-colors">arrow_forward</span>
+          </div>
+        </div>`;
+    }).join('') + `
+      <div onclick="openNewTableModal()"
+           class="table-card group border-2 border-dashed border-outline-variant bg-transparent rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-surface-container hover:border-primary/30 min-h-[200px]">
+        <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-on-primary transition-all">
+          <span class="material-symbols-outlined">add_circle</span>
+        </div>
+        <h4 class="text-lg font-headline font-bold text-on-surface-variant">Nueva Mesa</h4>
+        <p class="text-xs text-outline mt-1">Agregar al salón</p>
+      </div>`;
+  }
+
+  // =====================================================================
+  // PRODUCTOS
+  // =====================================================================
+  async function loadProducts() {
+    try {
+      const res = await fetch(`${API_URL}/products`, { headers: HEADERS });
+      if (!res.ok) throw new Error();
+      allProducts = await res.json();
+    } catch {
+      products = []; 
+    }
+  }
+
+  // =====================================================================
+  // DRAWER — abrir mesa
+  // =====================================================================
+  window.openTableDetail = async (tableName) => {
+    window._currentTable = tableName;
+    window._currentOrderId = null;
+    Cart.items = [];
+
+    document.getElementById('drawer-table-badge').textContent = tableName;
+    document.getElementById('panel-table-label').textContent = `Agregando a ${tableName}`;
+    document.getElementById('cart-drawer').classList.remove('translate-x-full');
+    showBackdrop(true);
+    renderCartUI(); // mostrar vacío mientras carga
+
+    try {
+      const res = await fetch(`${API_URL}/orders/table/${encodeURIComponent(tableName)}`, { headers: HEADERS });
+      if (!res.ok) throw new Error('Error del servidor');
+      const order = await res.json();
+
+      // Guardar el ID de la orden para cerrarla después
+      window._currentOrderId = order.id;
+
+      // Cargar los items de la orden en el carrito local
+      // Cada item guarda su itemId (id de order_items) para poder hacer PATCH/DELETE
+      Cart.items = (order.order_items || []).map(item => ({
+        id: item.product_id,
+        itemId: item.id,             // <- ID de order_items en Supabase
+        name: item.products?.name || 'Producto',
+        price: parseFloat(item.products?.price || 0),
+        quantity: item.quantity,
+      }));
+
+      renderCartUI();
+    } catch (e) {
+      console.error('Error abriendo mesa:', e.message);
+      showToast('warn', 'No se pudo cargar la mesa');
+    }
+  };
+
+  window.closeAll = () => {
+    if (panelOpen) closeProductsPanel(false);
+    document.getElementById('cart-drawer').classList.add('translate-x-full');
+    showBackdrop(false);
+    window._currentTable = null;
+    window._currentOrderId = null;
+    Cart.items = [];
+  };
+
+  function showBackdrop(show) {
+    const bd = document.getElementById('drawer-backdrop');
+    if (show) {
+      bd.classList.remove('hidden', 'pointer-events-none');
+      requestAnimationFrame(() => bd.style.opacity = '1');
+    } else {
+      bd.style.opacity = '0';
+      setTimeout(() => bd.classList.add('hidden', 'pointer-events-none'), 260);
+    }
+  }
+
+  // =====================================================================
+  // PANEL DE PRODUCTOS — toggle
+  // =====================================================================
+  window.toggleProductsPanel = () => panelOpen ? closeProductsPanel() : openProductsPanel();
+
+  function openProductsPanel() {
+    panelOpen = true;
+    panelCategory = 'Todos';
+    const panel = document.getElementById('products-panel');
+    panel.style.right = '400px';
+    panel.classList.remove('translate-x-full');
+    document.getElementById('btn-add-chevron').style.transform = 'rotate(180deg)';
+    document.getElementById('btn-add-label').textContent = 'Ocultar productos';
+    renderPanelCategories();
+    renderPanelProducts(allProducts);
+  }
+
+  window.closeProductsPanel = function(resetBtn = true) {
+    panelOpen = false;
+    const panel = document.getElementById('products-panel');
+    panel.classList.add('translate-x-full');
+    panel.style.right = '0';
+    if (resetBtn) {
+      document.getElementById('btn-add-chevron').style.transform = 'rotate(0deg)';
+      document.getElementById('btn-add-label').textContent = 'Agregar productos';
+    }
+    const s = document.getElementById('panel-search');
+    if (s) s.value = '';
+    panelCategory = 'Todos';
+  };
+
+  function renderPanelCategories() {
+    const cats = ['Todos', ...new Set(allProducts.map(p => p.category).filter(Boolean))];
+    document.getElementById('panel-categories').innerHTML = cats.map(cat => `
+      <button onclick="setPanelCategory('${cat}')"
+        class="cat-chip flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-headline font-bold transition-all
+               bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest
+               ${cat === panelCategory ? 'active' : ''}">
+        ${cat}
+      </button>`).join('');
+  }
+
+  window.setPanelCategory = (cat) => {
+    panelCategory = cat;
+    renderPanelCategories();
+    applyPanelFilter();
+  };
+
+  window.filterPanelProducts = () => applyPanelFilter();
+
+  function applyPanelFilter() {
+    const q = document.getElementById('panel-search').value.toLowerCase();
+    const filtered = allProducts
+      .filter(p => panelCategory === 'Todos' || p.category === panelCategory)
+      .filter(p => !q || p.name.toLowerCase().includes(q) || (p.sku || '').toLowerCase().includes(q));
+    renderPanelProducts(filtered);
+  }
+
+  function renderPanelProducts(products) {
+    const container = document.getElementById('panel-products');
+    if (!products.length) {
+      container.innerHTML = `<div class="flex flex-col items-center justify-center h-40 text-outline opacity-60">
+        <span class="material-symbols-outlined text-4xl mb-2">search_off</span>
+        <p class="text-xs font-bold">Sin resultados</p></div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="grid grid-cols-2 gap-3">
+      ${products.map(p => {
+        const oos = p.stock === 0;
+        const inCart = Cart.items.find(i => i.id === p.id);
+        return `
+          <div class="prod-card relative bg-surface-container-lowest rounded-2xl p-4 ${oos ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}"
+               onclick="${oos ? '' : `addToCart('${p.id}')`}">
+            <div class="absolute top-3 right-3">
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full
+                ${oos ? 'bg-error-container text-on-error-container' : 'bg-tertiary/10 text-tertiary'}">
+                ${oos ? 'Agotado' : p.stock}
+              </span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center mb-3">
+              <span class="material-symbols-outlined text-xl text-outline">restaurant</span>
+            </div>
+            <p class="font-headline font-bold text-sm text-on-surface leading-tight mb-0.5 pr-10">${p.name}</p>
+            <p class="text-[11px] text-on-surface-variant mb-3">${p.category || ''}</p>
+            <div class="flex items-center justify-between">
+              <span class="font-headline font-black text-sm ${oos ? 'text-outline' : 'text-primary'}">
+                $${p.price.toLocaleString('es-AR')}
+              </span>
+              ${!oos ? (inCart ? `
+                <div class="flex items-center gap-1 bg-primary/10 rounded-full px-1.5 py-0.5" onclick="event.stopPropagation()">
+                  <button onclick="updateQty('${inCart.itemId}', ${inCart.quantity - 1})"
+                    class="w-5 h-5 rounded-full bg-white shadow-sm flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all active:scale-90">
+                    <span class="material-symbols-outlined text-xs">remove</span>
+                  </button>
+                  <span class="text-xs font-black text-primary w-4 text-center">${inCart.quantity}</span>
+                  <button onclick="updateQty('${inCart.itemId}', ${inCart.quantity + 1})"
+                    class="w-5 h-5 rounded-full bg-primary text-white shadow-sm flex items-center justify-center hover:opacity-80 transition-all active:scale-90">
+                    <span class="material-symbols-outlined text-xs">add</span>
+                  </button>
+                </div>` : `
+                <button onclick="event.stopPropagation(); addToCart('${p.id}')"
+                  class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center hover:bg-primary hover:text-white transition-all active:scale-90">
+                  <span class="material-symbols-outlined text-sm">add</span>
+                </button>`) : ''}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  // =====================================================================
+  // ACCIONES DEL CARRITO → sincronizan con Supabase via NestJS
+  // =====================================================================
+
+  /**
+   * Agrega un producto a la orden.
+   * POST /orders/add-item → el backend hace upsert en order_items
+   * Devuelve el item con su ID para guardarlo localmente.
+   */
+  window.addToCart = async (productId) => {
+    const p = allProducts.find(x => x.id === productId);
+    if (!p || p.stock === 0 || !window._currentTable) return;
+
+    // Optimistic: agregar localmente primero para que se vea inmediato
+    const existing = Cart.items.find(i => i.id === productId);
+    if (existing) {
+      existing.quantity++;
+    } else {
+      Cart.items.push({ id: p.id, itemId: null, name: p.name, price: p.price, quantity: 1 });
+    }
+    renderCartUI();
+    if (panelOpen) applyPanelFilter();
+
+    try {
+      const res = await fetch(`${API_URL}/orders/add-item`, {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify({
+          tableId: window._currentTable,
+          productId: p.id,
+          quantity: 1,
+        }),
+      });
+      if (!res.ok) throw new Error('Error del servidor');
+      const { item } = await res.json();
+
+      // Guardar el itemId real que devuelve Supabase
+      const cartItem = Cart.items.find(i => i.id === productId);
+      if (cartItem) cartItem.itemId = item.id;
+
+      showToast('add', p.name);
+      if (panelOpen) applyPanelFilter();
+    } catch (e) {
+      // Revertir el optimistic update
+      const idx = Cart.items.findIndex(i => i.id === productId);
+      if (idx !== -1) {
+        Cart.items[idx].quantity--;
+        if (Cart.items[idx].quantity <= 0) Cart.items.splice(idx, 1);
+      }
+      renderCartUI();
+      showToast('warn', 'Error al agregar producto');
+      console.error(e);
+    }
+  };
+
+  /**
+   * Actualiza cantidad de un item (desde el panel O desde el carrito).
+   * Si quantity = 0 → DELETE /orders/item/:itemId
+   * Si quantity > 0 → PATCH /orders/item/:itemId
+   */
+  window.updateQty = async (itemId, newQty) => {
+    if (!itemId) return; // item aún no tiene ID del servidor
+
+    const cartItem = Cart.items.find(i => i.itemId === itemId);
+    if (!cartItem) return;
+
+    const oldQty = cartItem.quantity;
+
+    // Optimistic update
+    if (newQty <= 0) {
+      Cart.items = Cart.items.filter(i => i.itemId !== itemId);
+    } else {
+      cartItem.quantity = newQty;
+    }
+    renderCartUI();
+    if (panelOpen) applyPanelFilter();
+
+    try {
+      if (newQty <= 0) {
+        const res = await fetch(`${API_URL}/orders/item/${itemId}`, {
+          method: 'DELETE',
+          headers: HEADERS,
+        });
+        if (!res.ok) throw new Error();
+      } else {
+        const res = await fetch(`${API_URL}/orders/item/${itemId}`, {
+          method: 'PATCH',
+          headers: JSON_HEADERS,
+          body: JSON.stringify({ quantity: newQty }),
+        });
+        if (!res.ok) throw new Error();
+      }
+    } catch (e) {
+      // Revertir
+      if (newQty <= 0) {
+        Cart.items.push({ ...cartItem, quantity: oldQty });
+      } else {
+        const item = Cart.items.find(i => i.itemId === itemId);
+        if (item) item.quantity = oldQty;
+      }
+      renderCartUI();
+      showToast('warn', 'Error al actualizar');
+      console.error(e);
+    }
+  };
+
+  // Alias para compatibilidad con los botones del carrito drawer
+  window.updateItemQty = (itemId, change) => {
+    const cartItem = Cart.items.find(i => i.itemId === itemId);
+    if (cartItem) window.updateQty(itemId, cartItem.quantity + change);
+  };
+
+  window.panelUpdateQty = (itemId, change) => {
+    const cartItem = Cart.items.find(i => i.itemId === itemId);
+    if (cartItem) window.updateQty(itemId, cartItem.quantity + change);
+  };
+
+  /**
+   * Limpia todos los items de la orden (DELETE uno por uno)
+   */
+  window.clearCart = async () => {
+    if (Cart.items.length === 0) return;
+    const itemsToDelete = [...Cart.items];
+    Cart.items = [];
+    renderCartUI();
+    if (panelOpen) applyPanelFilter();
+
+    try {
+      await Promise.all(
+        itemsToDelete
+          .filter(i => i.itemId)
+          .map(i => fetch(`${API_URL}/orders/item/${i.itemId}`, {
+            method: 'DELETE',
+            headers: HEADERS,
+          }))
+      );
+    } catch (e) {
+      console.error('Error limpiando carrito:', e);
+    }
+  };
+
+  // =====================================================================
+  // RENDER CARRITO
+  // =====================================================================
+  function renderCartUI() {
+    const listEl   = document.getElementById('cart-items');
+    const footerEl = document.getElementById('cart-footer');
+    if (!listEl || !footerEl) return;
+
+    if (Cart.items.length === 0) {
+      listEl.innerHTML = `
+        <div class="flex flex-col items-center justify-center h-48 text-outline opacity-50">
+          <span class="material-symbols-outlined text-5xl mb-2">shopping_basket</span>
+          <p class="text-xs font-bold uppercase tracking-widest">Sin productos</p>
+          <p class="text-[11px] text-outline/60 mt-1">Usá el botón de arriba para agregar</p>
+        </div>`;
+      footerEl.innerHTML = '';
+      return;
+    }
+
+    const total = Cart.items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+    listEl.innerHTML = Cart.items.map(item => `
+      <div class="group bounce-in">
+        <div class="flex justify-between mb-2">
+          <p class="font-headline font-bold text-sm text-on-surface flex-1 leading-tight pr-2">${item.name}</p>
+          <p class="font-black text-on-surface text-sm">$${(item.price * item.quantity).toLocaleString('es-AR', {minimumFractionDigits:2})}</p>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 bg-surface-container rounded-full p-1 w-fit">
+            <button class="w-7 h-7 bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-all flex items-center justify-center"
+              onclick="window.updateQty('${item.itemId}', ${item.quantity - 1})">
+              <span class="material-symbols-outlined text-sm">remove</span>
+            </button>
+            <span class="font-bold text-sm w-5 text-center">${item.quantity}</span>
+            <button class="w-7 h-7 bg-surface-container-lowest rounded-full shadow-sm text-primary active:scale-90 transition-all flex items-center justify-center"
+              onclick="window.updateQty('${item.itemId}', ${item.quantity + 1})">
+              <span class="material-symbols-outlined text-sm">add</span>
+            </button>
+          </div>
+          <span class="text-xs text-outline">$${item.price.toLocaleString('es-AR')} c/u</span>
+        </div>
+      </div>
+      <div class="h-px bg-outline-variant/20 mx-2"></div>`).join('');
+
+    footerEl.innerHTML = `
+      <div class="flex items-center justify-between mb-5">
+        <span class="font-headline font-black text-lg text-on-surface uppercase">Total</span>
+        <span class="font-headline font-black text-2xl text-primary">$${total.toLocaleString('es-AR', {minimumFractionDigits:2})}</span>
+      </div>
+      <div class="mb-4">
+        <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Método de Pago</label>
+        <div class="relative">
+          <select id="payment-method" class="w-full bg-surface-container-high border-none rounded-full py-3 px-4 text-sm font-bold appearance-none focus:ring-2 focus:ring-primary outline-none">
+            <option value="cash">Efectivo</option>
+            <option value="card">Tarjeta</option>
+            <option value="qr">QR / Transferencia</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
+        </div>
+      </div>
+      <button onclick="window.processOrder()" class="w-full bg-primary text-on-primary py-5 rounded-full font-headline font-black text-lg shadow-xl shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-3">
+        Confirmar Pedido
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>`;
+  }
+
+  // =====================================================================
+  // CONFIRMAR PEDIDO — cierra la orden
+  // =====================================================================
+  window.processOrder = async () => {
+    if (Cart.items.length === 0) { showToast('warn', 'Agregá productos primero'); return; }
+    if (!window._currentOrderId) { showToast('warn', 'No hay orden activa'); return; }
+
+    try {
+      const res = await fetch(`${API_URL}/orders/close/${window._currentOrderId}`, {
+        method: 'POST',
+        headers: HEADERS,
+      });
+      if (!res.ok) throw new Error();
+    } catch (e) {
+      console.error('Error cerrando orden:', e);
+    }
+
+    showToast('ok', `Pedido de ${window._currentTable} confirmado ✓`);
+    Cart.items = [];
+    setTimeout(() => { closeAll(); loadActiveTables(); }, 1400);
+  };
+
+  // =====================================================================
+  // MODAL NUEVA MESA
+  // =====================================================================
+  window.openNewTableModal = () => {
+    const m = document.getElementById('modal-overlay');
+    m.classList.remove('hidden'); m.classList.add('flex');
+    document.getElementById('input-table-name').focus();
+  };
+  window.closeNewTableModal = () => {
+    document.getElementById('modal-overlay').classList.add('hidden');
+    document.getElementById('modal-overlay').classList.remove('flex');
+    document.getElementById('input-table-name').value = '';
+  };
+  window.createNewTable = async () => {
+    const name = document.getElementById('input-table-name').value.trim();
+    if (!name) { showToast('warn', 'Ingresá un nombre'); return; }
+    closeNewTableModal();
+    loadActiveTables();
+    showToast('ok', `Mesa "${name}" lista`);
+  };
+
+  // =====================================================================
+  // TOAST
+  // =====================================================================
+  function showToast(type, msg) {
+    const toast = document.getElementById('toast');
+    const icons = { ok: 'check_circle', warn: 'warning', add: 'add_circle' };
+    toast.innerHTML = `<span class="material-symbols-outlined text-sm">${icons[type] || 'info'}</span>${msg}`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.style.opacity = '0', 2600);
+  }
+  window.showToast = showToast;
+
+  // =====================================================================
+  // KEYBOARD
+  // =====================================================================
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (panelOpen) closeProductsPanel();
+      else closeAll();
+    }
+    if (e.key === 'n' && !e.target.matches('input, select')) openNewTableModal();
+  });
+  document.getElementById('input-table-name').addEventListener('keydown', e => {
+    if (e.key === 'Enter') createNewTable();
+  });
+
+  // =====================================================================
+  // INIT
+  // =====================================================================
+  // --- INIT SESIÓN UI ---
+  (function initSessionUI() {
+    try {
+      const user = JSON.parse(localStorage.getItem('od_user') || 'null');
+      if (!user) return;
+      const name    = `${user.firstName||''} ${user.lastName||''}`.trim() || user.email || 'Usuario';
+      const initial = (name[0] || 'U').toUpperCase();
+      document.getElementById('topbar-initial').textContent  = initial;
+      document.getElementById('topbar-name').textContent     = name;
+      document.getElementById('dropdown-name').textContent   = name;
+      document.getElementById('dropdown-email').textContent  = user.email || '';
+    } catch {}
+  })();
+
+  window.toggleUserMenu = () => {
+    document.getElementById('user-menu-dropdown').classList.toggle('hidden');
+  };
+  window.doLogout = async () => {
+    try {
+      await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: HEADERS });
+    } catch {}
+    ['od_token','od_user','od_business_id','od_business','od_products',
+     'od_team_invites','od_setup_complete','onceydoce_config']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'setup.html';
+  };
+  document.addEventListener('click', e => {
+    const btn = document.getElementById('user-menu-btn');
+    const dd  = document.getElementById('user-menu-dropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.add('hidden');
+  });
+
+  await loadProducts();
+  await loadActiveTables();
+</script>
+</body>
+</html>

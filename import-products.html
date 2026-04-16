@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnceyDoce — Importar Productos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary": "#2b3896", "on-primary": "#ffffff",
+          "primary-container": "#4551af", "on-primary-container": "#cbcfff",
+          "secondary": "#4858ab", "secondary-container": "#96a5ff",
+          "on-secondary-container": "#27378a",
+          "tertiary": "#004c44", "on-tertiary": "#ffffff",
+          "tertiary-container": "#00665b", "on-tertiary-container": "#7ce4d3",
+          "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a",
+          "surface": "#f4faff", "surface-dim": "#cfdce4",
+          "surface-container-lowest": "#ffffff", "surface-container-low": "#e9f6fd",
+          "surface-container": "#e3f0f8", "surface-container-high": "#ddeaf2",
+          "surface-container-highest": "#d7e4ec",
+          "on-surface": "#111d23", "on-surface-variant": "#454652",
+          "outline": "#757684", "outline-variant": "#c5c5d4",
+          "background": "#f4faff",
+        },
+        borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+        fontFamily: { "headline": ["Manrope"], "body": ["Inter"] }
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family: 'Inter', sans-serif; }
+  .font-headline, h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c5c5d4; border-radius: 10px; }
+
+  .dropzone { transition: all .25s ease; }
+  .dropzone.dragover { border-color: #2b3896; background: #f0f2ff; transform: scale(1.01); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes checkPop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  @keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:calc(400px + 100%) 0} }
+  @keyframes slideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+
+  .fade-up  { animation: fadeUp .4s ease forwards; }
+  .spin     { animation: spin 1.2s linear infinite; display: inline-block; }
+  .check-pop { animation: checkPop .45s cubic-bezier(.34,1.56,.64,1); }
+  .slide-in { animation: slideIn .25s ease forwards; opacity: 0; }
+  .skeleton { background: linear-gradient(90deg,#e3f0f8 25%,#f4faff 50%,#e3f0f8 75%); background-size: 800px 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 8px; }
+
+  /* Import step chip */
+  .imp-chip .chip-icon { width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+
+  /* Preview table */
+  .preview-table th { background: #e3f0f8; }
+  .preview-table tr:nth-child(even) { background: #f4faff; }
+</style>
+</head>
+<body class="bg-surface-dim text-on-surface">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 flex flex-col py-6 z-50">
+  <div class="px-6 mb-8 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <span class="material-symbols-outlined text-white">restaurant</span>
+    </div>
+    <div>
+      <h1 class="font-headline font-black text-xl text-indigo-700" id="sidebar-biz">OnceyDoce</h1>
+      <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">POS</p>
+    </div>
+  </div>
+  <nav class="flex-1 space-y-1 px-2">
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="index.html">
+      <span class="material-symbols-outlined">deck</span>
+      <span class="font-headline">Mesas</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="terminal.html">
+      <span class="material-symbols-outlined">point_of_sale</span>
+      <span class="font-headline">Terminal</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="analytics.html">
+      <span class="material-symbols-outlined">analytics</span>
+      <span class="font-headline">Reportes</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 bg-white text-indigo-700 rounded-full font-bold shadow-sm" href="list-prod.html">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">inventory_2</span>
+      <span class="font-headline">Inventario</span>
+    </a>
+  </nav>
+
+  <!-- Usuario + Logout -->
+  <div class="px-4 mt-auto relative">
+    <button id="user-menu-btn" onclick="toggleUserMenu()"
+      class="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/60 transition-colors cursor-pointer">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold" id="sidebar-initial">U</div>
+      <div class="flex-1 text-left">
+        <p class="text-xs font-bold text-slate-700 truncate" id="sidebar-name">Usuario</p>
+        <p class="text-[10px] text-slate-400">Ver opciones</p>
+      </div>
+      <span class="material-symbols-outlined text-slate-400 text-sm">expand_more</span>
+    </button>
+    <div id="user-menu-dropdown"
+      class="hidden absolute bottom-14 left-4 right-4 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+      <div class="px-4 py-3 border-b border-slate-100">
+        <p class="text-xs font-bold text-slate-700 truncate" id="dropdown-name">Usuario</p>
+        <p class="text-[10px] text-slate-400 truncate" id="dropdown-email"></p>
+      </div>
+      <button onclick="doLogout()"
+        class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-colors text-sm font-bold">
+        <span class="material-symbols-outlined text-sm">logout</span>
+        Cerrar sesión
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== TOPBAR ===== -->
+<header class="fixed top-0 right-0 left-64 h-16 bg-white/80 backdrop-blur-md border-b border-outline-variant/20 flex items-center justify-between px-8 z-40">
+  <div class="flex items-center gap-3">
+    <a href="list-prod.html" class="p-2 text-outline hover:text-primary hover:bg-surface-container-low rounded-full transition-all">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </a>
+    <div>
+      <h2 class="text-lg font-headline font-bold text-on-surface">Importar Productos</h2>
+      <p class="text-xs text-on-surface-variant -mt-0.5">Desde Excel o CSV</p>
+    </div>
+  </div>
+  <a href="list-prod.html"
+    class="flex items-center gap-2 px-5 py-2 text-sm font-headline font-bold text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all">
+    <span class="material-symbols-outlined text-sm">inventory_2</span>
+    Ver inventario
+  </a>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="ml-64 mt-16 min-h-[calc(100vh-4rem)] p-8">
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-on-surface-variant mb-8">
+      <a href="list-prod.html" class="hover:text-primary transition-colors font-medium">Inventario</a>
+      <span class="material-symbols-outlined text-sm">chevron_right</span>
+      <span class="font-bold text-on-surface">Importar productos</span>
+    </div>
+
+    <!-- ============================================================
+         ESTADO 1 — SUBIR ARCHIVO
+         ============================================================ -->
+    <div id="state-upload" class="fade-up">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- Columna izquierda: info -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm space-y-4">
+            <h3 class="text-xs font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-base">table_chart</span>Columnas esperadas
+            </h3>
+            <ul class="space-y-2.5">
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span>
+                <span><strong class="text-on-surface">Nombre</strong> del producto</span>
+              </li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span>
+                <span><strong class="text-on-surface">Precio</strong> de venta</span>
+              </li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span>
+                <span><strong class="text-on-surface">Stock</strong> disponible</span>
+              </li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span>
+                <span><strong class="text-on-surface">Categoría</strong> (opcional)</span>
+              </li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant">
+                <span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span>
+                <span><strong class="text-on-surface">Descripción</strong> (opcional)</span>
+              </li>
+            </ul>
+            <button onclick="downloadTemplate()"
+              class="w-full py-2.5 rounded-full border border-indigo-200 text-indigo-700 text-xs font-black flex items-center justify-center gap-2 hover:bg-indigo-50 transition-colors">
+              <span class="material-symbols-outlined text-sm">download</span>DESCARGAR PLANTILLA
+            </button>
+          </div>
+
+          <div class="bg-tertiary-container/80 text-on-tertiary p-5 rounded-2xl">
+            <h4 class="text-sm font-bold mb-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">tips_and_updates</span>Tip
+            </h4>
+            <p class="text-xs opacity-90 leading-relaxed">Los nombres de columnas no importan. El sistema detecta automáticamente cuál es el nombre, el precio y el stock.</p>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
+            <h4 class="text-xs font-black text-on-surface-variant uppercase tracking-widest mb-3">Formatos soportados</h4>
+            <div class="flex gap-2 flex-wrap">
+              <span class="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold">.XLSX</span>
+              <span class="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold">.XLS</span>
+              <span class="px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold">.CSV</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna derecha: dropzone -->
+        <div class="lg:col-span-8">
+          <div id="dropzone"
+            class="dropzone bg-surface-container-lowest rounded-2xl border-2 border-dashed border-outline-variant min-h-[320px] p-10 text-center cursor-pointer group hover:border-primary transition-colors flex flex-col items-center justify-center"
+            onclick="document.getElementById('file-input').click()"
+            ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
+
+            <!-- Estado vacío -->
+            <div id="dz-empty" class="flex flex-col items-center">
+              <div class="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings:'wght' 200;">upload_file</span>
+              </div>
+              <h3 class="text-xl font-headline font-bold text-on-surface mb-2">Subí tu lista de productos</h3>
+              <p class="text-on-surface-variant text-sm mb-5">Arrastrá el archivo acá o hacé clic para buscar</p>
+              <div class="flex gap-2">
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLSX</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLS</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.CSV</span>
+              </div>
+            </div>
+
+            <!-- Estado cargado -->
+            <div id="dz-loaded" class="hidden flex-col items-center w-full">
+              <span class="material-symbols-outlined text-tertiary text-5xl mb-3 check-pop" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              <h3 class="text-lg font-headline font-bold text-on-surface mb-2">Archivo listo</h3>
+              <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                <span class="material-symbols-outlined text-sm">table_chart</span>
+                <span id="filename-label">—</span>
+                <button onclick="clearFile(event)" class="material-symbols-outlined text-xs hover:text-error transition-colors">close</button>
+              </div>
+              <!-- Mini preview de columnas detectadas -->
+              <div id="file-preview" class="w-full max-w-lg"></div>
+            </div>
+
+            <input type="file" id="file-input" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(this)"/>
+          </div>
+
+          <!-- Opciones de importación -->
+          <div id="import-options" class="hidden mt-6 bg-surface-container-lowest rounded-2xl p-6 shadow-sm space-y-4 slide-in">
+            <h3 class="font-headline font-bold text-base text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">tune</span>Opciones de importación
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <label class="flex items-start gap-3 p-4 bg-surface-container-low rounded-2xl cursor-pointer hover:bg-surface-container transition-colors">
+                <input type="radio" name="import-mode" value="add" checked class="mt-1 accent-primary">
+                <div>
+                  <p class="font-bold text-sm text-on-surface">Agregar productos</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Suma los nuevos al inventario existente. No toca los que ya están.</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 p-4 bg-surface-container-low rounded-2xl cursor-pointer hover:bg-surface-container transition-colors">
+                <input type="radio" name="import-mode" value="replace" class="mt-1 accent-primary">
+                <div>
+                  <p class="font-bold text-sm text-on-surface">Reemplazar todo</p>
+                  <p class="text-xs text-on-surface-variant mt-0.5">Borra el inventario actual y carga solo los del archivo.</p>
+                </div>
+              </label>
+            </div>
+
+            <button onclick="startImport()"
+              class="w-full bg-primary text-on-primary py-4 rounded-full font-headline font-black text-base shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 mt-2">
+              <span class="material-symbols-outlined">upload</span>
+              Importar productos
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ESTADO 2 — PROGRESO
+         ============================================================ -->
+    <div id="state-progress" class="hidden">
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm mb-6">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <span class="material-symbols-outlined text-primary text-3xl spin" id="progress-icon">progress_activity</span>
+            </div>
+            <div>
+              <h3 class="font-headline font-bold text-xl text-on-surface" id="progress-title">Procesando archivo...</h3>
+              <p class="text-sm text-on-surface-variant" id="progress-subtitle">Preparando la importación</p>
+            </div>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden mb-6">
+            <div id="progress-bar" class="h-full bg-primary rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
+
+          <!-- Steps -->
+          <div id="import-steps" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         ESTADO 3 — RESULTADO
+         ============================================================ -->
+    <div id="state-result" class="hidden">
+      <div class="max-w-2xl mx-auto">
+
+        <!-- Success -->
+        <div id="result-success" class="hidden bg-surface-container-lowest rounded-2xl p-8 shadow-sm text-center mb-6 fade-up">
+          <div class="w-20 h-20 bg-tertiary/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <span class="material-symbols-outlined text-tertiary text-4xl check-pop" style="font-variation-settings:'FILL' 1;">check_circle</span>
+          </div>
+          <h2 class="text-3xl font-headline font-extrabold text-on-surface mb-2">¡Importación exitosa!</h2>
+          <p class="text-on-surface-variant mb-6" id="result-msg">Los productos fueron cargados correctamente.</p>
+
+          <!-- KPIs del resultado -->
+          <div class="grid grid-cols-3 gap-4 mb-8" id="result-kpis"></div>
+
+          <!-- Preview de productos importados -->
+          <div id="result-preview" class="text-left mb-8"></div>
+
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button onclick="resetImport()"
+              class="flex items-center justify-center gap-2 px-6 py-3 rounded-full border-2 border-outline-variant font-headline font-bold text-on-surface-variant hover:bg-surface-container transition-all">
+              <span class="material-symbols-outlined text-sm">upload_file</span>
+              Importar otro archivo
+            </button>
+            <a href="list-prod.html"
+              class="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-on-primary font-headline font-bold shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-sm">inventory_2</span>
+              Ver inventario
+            </a>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div id="result-error" class="hidden bg-error-container/20 border border-error/20 rounded-2xl p-8 text-center mb-6 fade-up">
+          <div class="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-error text-3xl">error</span>
+          </div>
+          <h2 class="text-2xl font-headline font-bold text-on-surface mb-2">Error en la importación</h2>
+          <p class="text-on-surface-variant mb-6" id="error-msg">No se pudieron cargar los productos.</p>
+          <button onclick="resetImport()"
+            class="px-8 py-3 rounded-full bg-primary text-on-primary font-headline font-bold shadow-lg hover:opacity-90 transition-all">
+            Intentar nuevamente
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
+
+<script>
+  // =====================================================================
+  // SESIÓN
+  // =====================================================================
+  const API_URL    = 'http://localhost:3000';
+  const token      = localStorage.getItem('od_token');
+  const businessId = localStorage.getItem('od_business_id');
+  if (!token || !businessId) { window.location.href = 'setup.html'; }
+
+  const HEADERS      = { 'x-business-id': businessId, 'Authorization': `Bearer ${token}` };
+  const JSON_HEADERS = { 'Content-Type': 'application/json', ...HEADERS };
+
+  // Init UI de sesión
+  (function initSessionUI() {
+    try {
+      const biz  = JSON.parse(localStorage.getItem('od_business') || 'null');
+      const user = JSON.parse(localStorage.getItem('od_user')     || 'null');
+      if (biz?.name) document.getElementById('sidebar-biz').textContent = biz.name;
+      if (user) {
+        const name    = `${user.firstName||''} ${user.lastName||''}`.trim() || user.email || 'Usuario';
+        const initial = (name[0] || 'U').toUpperCase();
+        document.getElementById('sidebar-initial').textContent = initial;
+        document.getElementById('sidebar-name').textContent    = name;
+        document.getElementById('dropdown-name').textContent   = name;
+        document.getElementById('dropdown-email').textContent  = user.email || '';
+      }
+    } catch {}
+  })();
+
+  function toggleUserMenu() {
+    document.getElementById('user-menu-dropdown').classList.toggle('hidden');
+  }
+  async function doLogout() {
+    try { await fetch(`${API_URL}/auth/logout`, { method: 'POST', headers: HEADERS }); } catch {}
+    ['od_token','od_user','od_business_id','od_business','od_products',
+     'od_team_invites','od_setup_complete','onceydoce_config']
+      .forEach(k => localStorage.removeItem(k));
+    window.location.href = 'setup.html';
+  }
+  document.addEventListener('click', e => {
+    const btn = document.getElementById('user-menu-btn');
+    const dd  = document.getElementById('user-menu-dropdown');
+    if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.add('hidden');
+  });
+
+  // =====================================================================
+  // STATE
+  // =====================================================================
+  let parsedProducts = null;
+
+  // =====================================================================
+  // DROPZONE
+  // =====================================================================
+  function onDragOver(e) {
+    e.preventDefault();
+    document.getElementById('dropzone').classList.add('dragover');
+  }
+  function onDragLeave() {
+    document.getElementById('dropzone').classList.remove('dragover');
+  }
+  function onDrop(e) {
+    e.preventDefault();
+    onDragLeave();
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) processFile(file);
+  }
+  function clearFile(e) {
+    e.stopPropagation();
+    parsedProducts = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('dz-empty').classList.remove('hidden');
+    document.getElementById('dz-loaded').classList.add('hidden');
+    document.getElementById('dz-loaded').classList.remove('flex');
+    document.getElementById('import-options').classList.add('hidden');
+  }
+
+  function processFile(file) {
+    const validExts = ['.xlsx', '.xls', '.csv'];
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!validExts.includes(ext)) {
+      showToast('warn', 'Formato no soportado. Usá .xlsx, .xls o .csv');
+      return;
+    }
+
+    document.getElementById('filename-label').textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        let json;
+        if (ext === '.csv') {
+          const text = new TextDecoder().decode(new Uint8Array(evt.target.result));
+          const wb   = XLSX.read(text, { type: 'string' });
+          json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        } else {
+          const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array' });
+          json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        }
+
+        if (json.length === 0) {
+          showToast('warn', 'El archivo está vacío o no tiene filas de datos');
+          return;
+        }
+
+        parsedProducts = json;
+        showFileLoaded(json);
+      } catch (err) {
+        showToast('warn', 'Error leyendo el archivo. Verificá que no esté corrupto.');
+        console.error(err);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showFileLoaded(json) {
+    const cols = Object.keys(json[0] || {});
+
+    // Mini preview
+    document.getElementById('file-preview').innerHTML = `
+      <div class="bg-indigo-50 rounded-2xl p-4 text-left">
+        <div class="flex justify-between mb-3">
+          <span class="text-xs font-black text-indigo-700 uppercase tracking-widest">Vista previa</span>
+          <div class="flex gap-3">
+            <span class="text-xs font-bold text-indigo-600">${json.length} filas</span>
+            <span class="text-xs text-indigo-400">·</span>
+            <span class="text-xs font-bold text-indigo-600">${cols.length} columnas</span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mb-3">
+          ${cols.slice(0, 8).map(c => `<span class="bg-white text-indigo-700 px-2.5 py-1 rounded-full text-xs font-bold shadow-sm">${c}</span>`).join('')}
+          ${cols.length > 8 ? `<span class="bg-white text-indigo-400 px-2.5 py-1 rounded-full text-xs font-bold">+${cols.length-8} más</span>` : ''}
+        </div>
+        <!-- Primeras 3 filas de preview -->
+        <div class="overflow-x-auto rounded-xl">
+          <table class="preview-table w-full text-xs border-collapse">
+            <thead>
+              <tr>${cols.slice(0,5).map(c => `<th class="px-3 py-2 text-left font-black text-indigo-700 whitespace-nowrap">${c}</th>`).join('')}${cols.length>5?'<th class="px-3 py-2 text-indigo-400">...</th>':''}</tr>
+            </thead>
+            <tbody>
+              ${json.slice(0,3).map(row => `
+                <tr>${cols.slice(0,5).map(c => `<td class="px-3 py-2 text-on-surface-variant truncate max-w-[120px]">${row[c] ?? '—'}</td>`).join('')}${cols.length>5?'<td class="px-3 py-2 text-outline">...</td>':''}</tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+
+    // Mostrar estado cargado
+    document.getElementById('dz-empty').classList.add('hidden');
+    const loaded = document.getElementById('dz-loaded');
+    loaded.classList.remove('hidden');
+    loaded.classList.add('flex');
+
+    // Mostrar opciones
+    const opts = document.getElementById('import-options');
+    opts.classList.remove('hidden');
+    opts.style.animation = 'none';
+    opts.offsetHeight; // reflow
+    opts.style.animation = '';
+  }
+
+  // =====================================================================
+  // TEMPLATE DOWNLOAD
+  // =====================================================================
+  function downloadTemplate() {
+    const wb   = XLSX.utils.book_new();
+    const data = [
+      ['Nombre', 'Descripción', 'Precio', 'Stock', 'Categoría'],
+      ['Café con leche',          'Espresso con leche',          350,  100, 'Bebidas'],
+      ['Medialunas x3',           'Tres medialunas de manteca',  250,   80, 'Panadería'],
+      ['Tostado jamón y queso',   'Pan con jamón y queso',       450,   50, 'Comidas'],
+      ['Agua mineral 500ml',      '',                            150,  200, 'Bebidas'],
+      ['Brownie de chocolate',    'Casero',                      750,   20, 'Postres'],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:25},{wch:30},{wch:10},{wch:8},{wch:15}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Productos');
+    XLSX.writeFile(wb, 'Plantilla_OnceyDoce.xlsx');
+  }
+
+  // =====================================================================
+  // IMPORT
+  // =====================================================================
+  function mapProducts(rawRows) {
+    return rawRows.map(row => {
+      const keys = Object.keys(row);
+      const nk = keys.find(k => /nombre|name|producto|item|descripcion\s*corta/i.test(k)) || keys[0];
+      const pk = keys.find(k => /precio|price|valor|costo/i.test(k));
+      const sk = keys.find(k => /stock|cantidad|qty|existencia/i.test(k));
+      const ck = keys.find(k => /categ|tipo|type|rubro/i.test(k));
+      const dk = keys.find(k => /desc/i.test(k));
+
+      return {
+        nombre:      String(row[nk] || '').trim(),
+        precio:      parseFloat(String(pk ? row[pk] : 0).replace(/[^0-9.]/g, '')) || 0,
+        stock:       parseInt(String(sk ? row[sk] : 0)) || 0,
+        categoria:   ck ? String(row[ck] || 'General') : 'General',
+        descripcion: dk ? String(row[dk] || '') : '',
+      };
+    }).filter(p => p.nombre.length > 0);
+  }
+
+  async function startImport() {
+    if (!parsedProducts || parsedProducts.length === 0) {
+      showToast('warn', 'Primero subí un archivo');
+      return;
+    }
+
+    const mode     = document.querySelector('input[name="import-mode"]:checked')?.value || 'add';
+    const products = mapProducts(parsedProducts);
+
+    if (products.length === 0) {
+      showToast('warn', 'No se encontraron productos válidos en el archivo');
+      return;
+    }
+
+    // Cambiar a estado progreso
+    showState('progress');
+    const steps = [
+      { id: 'step-parse',  label: `Procesando ${products.length} productos del archivo`, icon: 'description' },
+      { id: 'step-send',   label: 'Enviando al servidor',                                icon: 'cloud_upload' },
+      { id: 'step-done',   label: 'Verificando resultado',                               icon: 'fact_check' },
+    ];
+    renderSteps(steps);
+
+    try {
+      // Step 1 — parse (ya está hecho, solo animamos)
+      await sleep(600);
+      setStep('step-parse', 'done', 'Procesado');
+      setProgress(33);
+
+      // Step 2 — enviar al backend
+      setStep('step-send', 'loading', 'Enviando...');
+      document.getElementById('progress-title').textContent   = 'Importando productos...';
+      document.getElementById('progress-subtitle').textContent = `Enviando ${products.length} productos al inventario`;
+
+      const payload = { products, mode };
+      const res = await fetch(`${API_URL}/import/products`, {
+        method: 'POST',
+        headers: JSON_HEADERS,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `Error del servidor (${res.status})`);
+      }
+
+      const result = await res.json();
+      setStep('step-send', 'done', 'Enviado');
+      setProgress(66);
+
+      // Step 3 — verificar
+      setStep('step-done', 'loading', 'Verificando...');
+      await sleep(500);
+      setStep('step-done', 'done', 'Listo ✓');
+      setProgress(100);
+
+      document.getElementById('progress-icon').className = 'material-symbols-outlined text-tertiary text-3xl check-pop';
+      document.getElementById('progress-icon').textContent = 'check_circle';
+      document.getElementById('progress-icon').style.fontVariationSettings = "'FILL' 1";
+      document.getElementById('progress-title').textContent   = '¡Importación completada!';
+      document.getElementById('progress-subtitle').textContent = '';
+
+      await sleep(700);
+      showResult(true, products, result);
+
+    } catch (err) {
+      console.error('Import error:', err);
+      setProgress(100);
+      document.getElementById('progress-icon').className = 'material-symbols-outlined text-error text-3xl';
+      document.getElementById('progress-icon').textContent = 'error';
+      document.getElementById('progress-title').textContent    = 'Error en la importación';
+      document.getElementById('progress-subtitle').textContent = err.message;
+      await sleep(800);
+      showResult(false, products, null, err.message);
+    }
+  }
+
+  function showResult(success, products, serverResult, errorMsg = '') {
+    showState('result');
+
+    if (success) {
+      document.getElementById('result-success').classList.remove('hidden');
+      document.getElementById('result-error').classList.add('hidden');
+
+      const imported = serverResult?.imported ?? products.length;
+      const skipped  = serverResult?.skipped  ?? 0;
+      const cats     = [...new Set(products.map(p => p.categoria).filter(Boolean))];
+
+      document.getElementById('result-msg').textContent =
+        `${imported} producto${imported !== 1 ? 's' : ''} importado${imported !== 1 ? 's' : ''} correctamente a tu inventario.`;
+
+      document.getElementById('result-kpis').innerHTML = [
+        { label: 'Importados',  value: imported,     icon: 'check_circle',  color: 'text-tertiary',   bg: 'bg-tertiary/10' },
+        { label: 'Categorías',  value: cats.length,  icon: 'category',      color: 'text-primary',    bg: 'bg-primary/10' },
+        { label: 'Omitidos',    value: skipped,      icon: 'info',          color: 'text-amber-600',  bg: 'bg-amber-50' },
+      ].map(k => `
+        <div class="bg-surface-container-low rounded-2xl p-4 flex flex-col items-center gap-2">
+          <div class="w-10 h-10 ${k.bg} rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined ${k.color} text-xl" style="font-variation-settings:'FILL' 1;">${k.icon}</span>
+          </div>
+          <p class="font-headline font-black text-2xl text-on-surface">${k.value}</p>
+          <p class="text-xs font-bold text-on-surface-variant">${k.label}</p>
+        </div>`).join('');
+
+      // Preview de primeros 8 productos importados
+      const previewProds = products.slice(0, 8);
+      document.getElementById('result-preview').innerHTML = `
+        <div class="bg-surface-container-low rounded-2xl overflow-hidden">
+          <div class="px-5 py-3 border-b border-outline-variant/20 flex items-center justify-between">
+            <p class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Productos importados</p>
+            ${products.length > 8 ? `<p class="text-xs text-outline">Mostrando 8 de ${products.length}</p>` : ''}
+          </div>
+          <div class="divide-y divide-outline-variant/10">
+            ${previewProds.map(p => `
+              <div class="flex items-center justify-between px-5 py-3">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <div class="w-8 h-8 bg-surface-container rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-sm text-outline">restaurant</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="font-bold text-sm text-on-surface truncate">${p.nombre}</p>
+                    <p class="text-xs text-on-surface-variant">${p.categoria}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 flex-shrink-0 ml-3">
+                  <span class="text-xs text-on-surface-variant">Stock: ${p.stock}</span>
+                  <span class="font-headline font-black text-sm text-primary">$${p.precio.toLocaleString('es-AR')}</span>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    } else {
+      document.getElementById('result-success').classList.add('hidden');
+      document.getElementById('result-error').classList.remove('hidden');
+      document.getElementById('error-msg').textContent = errorMsg || 'Ocurrió un error inesperado. Intentá de nuevo.';
+    }
+  }
+
+  function resetImport() {
+    parsedProducts = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('dz-empty').classList.remove('hidden');
+    document.getElementById('dz-loaded').classList.add('hidden');
+    document.getElementById('dz-loaded').classList.remove('flex');
+    document.getElementById('import-options').classList.add('hidden');
+    document.getElementById('file-preview').innerHTML = '';
+    document.getElementById('result-success').classList.add('hidden');
+    document.getElementById('result-error').classList.add('hidden');
+    showState('upload');
+  }
+
+  // =====================================================================
+  // HELPERS — UI
+  // =====================================================================
+  function showState(state) {
+    ['upload','progress','result'].forEach(s => {
+      document.getElementById(`state-${s}`).classList.toggle('hidden', s !== state);
+    });
+  }
+
+  function renderSteps(steps) {
+    document.getElementById('import-steps').innerHTML = steps.map(s => `
+      <div class="imp-chip flex items-center gap-3" id="${s.id}">
+        <div class="chip-icon bg-surface-container text-on-surface-variant">
+          <span class="material-symbols-outlined text-sm">hourglass_empty</span>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant text-base">${s.icon}</span>
+        <span class="text-sm text-on-surface-variant font-medium flex-1">${s.label}</span>
+        <span class="text-xs text-on-surface-variant font-medium" id="${s.id}-st">Pendiente</span>
+      </div>`).join('');
+  }
+
+  function setStep(id, status, label) {
+    const el   = document.getElementById(id);
+    const icon = el.querySelector('.chip-icon');
+    const st   = document.getElementById(`${id}-st`);
+    if (!el || !st) return;
+    st.textContent = label;
+    if (status === 'loading') {
+      icon.className = 'chip-icon bg-primary/10 text-primary';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm spin" style="display:block">progress_activity</span>';
+      st.className = 'text-xs text-primary font-bold';
+    } else if (status === 'done') {
+      icon.className = 'chip-icon bg-tertiary/10 text-tertiary check-pop';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm" style="font-variation-settings:\'FILL\' 1;">check_circle</span>';
+      st.className = 'text-xs text-tertiary font-bold';
+    } else {
+      icon.className = 'chip-icon bg-error-container text-error';
+      icon.innerHTML = '<span class="material-symbols-outlined text-sm">error</span>';
+      st.className = 'text-xs text-error font-bold';
+    }
+  }
+
+  function setProgress(pct) {
+    document.getElementById('progress-bar').style.width = `${pct}%`;
+  }
+
+  function showToast(type, msg) {
+    const toast = document.getElementById('toast');
+    const icons = { ok: 'check_circle', warn: 'warning', info: 'info' };
+    toast.innerHTML = `<span class="material-symbols-outlined text-sm">${icons[type] || 'info'}</span>${msg}`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.style.opacity = '0', 3000);
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // =====================================================================
+  // KEYBOARD
+  // =====================================================================
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !document.getElementById('state-progress').classList.contains('hidden')) return;
+  });
+</script>
+</body>
+</html>
