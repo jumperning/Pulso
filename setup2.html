@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OnceyDoce — Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          "primary":"#2b3896","on-primary":"#ffffff",
+          "primary-container":"#4551af","on-primary-container":"#cbcfff",
+          "secondary":"#4858ab","secondary-container":"#96a5ff","on-secondary-container":"#27378a",
+          "tertiary":"#004c44","on-tertiary":"#ffffff",
+          "tertiary-container":"#00665b","on-tertiary-container":"#7ce4d3",
+          "error":"#ba1a1a","error-container":"#ffdad6","on-error-container":"#93000a",
+          "surface":"#f4faff","surface-dim":"#cfdce4",
+          "surface-container-lowest":"#ffffff","surface-container-low":"#e9f6fd",
+          "surface-container":"#e3f0f8","surface-container-high":"#ddeaf2","surface-container-highest":"#d7e4ec",
+          "on-surface":"#111d23","on-surface-variant":"#454652",
+          "outline":"#757684","outline-variant":"#c5c5d4","background":"#f4faff",
+        },
+        borderRadius:{"DEFAULT":"1rem","lg":"2rem","xl":"3rem","full":"9999px"},
+        fontFamily:{"headline":["Manrope"],"body":["Inter"]}
+      }
+    }
+  }
+</script>
+<style>
+  body { font-family:'Inter',sans-serif; }
+  .font-headline,h1,h2,h3,h4 { font-family:'Manrope',sans-serif; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; vertical-align:middle; }
+  .no-scrollbar::-webkit-scrollbar { display:none; }
+  .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+  ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:#c5c5d4; border-radius:10px; }
+
+  .step-panel { display:none; }
+  .step-panel.active { display:flex; }
+  .dropzone { transition:all .25s ease; }
+  .dropzone.dragover { border-color:#2b3896; background:#f0f2ff; transform:scale(1.01); }
+
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+  @keyframes cardIn   { from{opacity:0;transform:scale(.94)} to{opacity:1;transform:scale(1)} }
+  @keyframes slideIn  { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes chipIn   { from{opacity:0;transform:scale(.7) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  @keyframes checkPop { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  @keyframes spin     { to{transform:rotate(360deg)} }
+  @keyframes pulseDot { 0%,80%,100%{opacity:.3;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+  @keyframes shimmer  { 0%{background-position:-400px 0} 100%{background-position:calc(400px + 100%) 0} }
+
+  .fade-up    { animation:fadeUp  .4s ease forwards; }
+  .card-in    { animation:cardIn  .4s cubic-bezier(.34,1.56,.64,1) forwards; opacity:0; }
+  .slide-in   { animation:slideIn .35s ease forwards; opacity:0; }
+  .chip-in    { animation:chipIn  .3s cubic-bezier(.34,1.56,.64,1); }
+  .check-pop  { animation:checkPop .5s cubic-bezier(.34,1.56,.64,1); }
+  .spin       { animation:spin 1.5s linear infinite; }
+  .pulse-dot  { animation:pulseDot 1.2s ease-in-out infinite; }
+  .pulse-dot:nth-child(2){animation-delay:.2s}
+  .pulse-dot:nth-child(3){animation-delay:.4s}
+  .skeleton   { background:linear-gradient(90deg,#e3f0f8 25%,#f4faff 50%,#e3f0f8 75%); background-size:800px 100%; animation:shimmer 1.4s ease-in-out infinite; border-radius:8px; }
+
+  .progress-bar { transition:width .6s cubic-bezier(.65,0,.35,1); }
+  .nav-item { transition:all .2s ease; }
+
+  /* Biz type */
+  .biz-type-btn { transition:all .15s ease; }
+  .biz-type-btn.selected { border-color:#2b3896; background:rgba(43,56,150,.06); }
+  .biz-type-btn.selected .biz-icon { color:#2b3896; }
+  .biz-type-btn.selected .biz-label { color:#2b3896; }
+
+  /* Brand color swatch */
+  .color-swatch { transition:all .15s ease; cursor:pointer; }
+  .color-swatch.active { ring:2px solid white; box-shadow:0 0 0 3px var(--sw-color); }
+
+  /* Team row */
+  .team-row { animation:fadeUp .25s ease; }
+
+  /* Import chip */
+  .import-chip .status-icon { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+</style>
+</head>
+<body class="bg-background text-on-surface min-h-screen flex overflow-hidden">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="h-screen w-72 sticky left-0 top-0 bg-slate-50 border-r border-slate-100 flex flex-col py-6 z-20 flex-shrink-0">
+
+  <div class="px-8 mb-10 flex items-center gap-3">
+    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1;">restaurant</span>
+    </div>
+    <div>
+      <h1 class="font-headline font-black text-lg text-indigo-700 leading-tight">OnceyDoce</h1>
+      <p class="text-slate-500 text-xs font-medium">Setup Wizard</p>
+    </div>
+  </div>
+
+  <!-- Nav steps (2-5 only) -->
+  <nav class="flex-1 px-4 space-y-0.5" id="side-nav">
+    <div class="nav-item rounded-full px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-2" onclick="tryGoTo(2)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-2">1</div>
+      <div><p class="text-sm font-headline font-bold leading-tight">Tu negocio</p><p class="text-xs text-on-surface-variant">Nombre, logo, colores</p></div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-2" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+    <div class="nav-item rounded-full px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-3" onclick="tryGoTo(3)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-3">2</div>
+      <div><p class="text-sm font-headline font-bold leading-tight">Equipo</p><p class="text-xs text-on-surface-variant">Invitar colaboradores</p></div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-3" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+    <div class="nav-item rounded-full px-4 py-3 flex items-center gap-3 cursor-pointer" id="nav-4" onclick="tryGoTo(4)">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-4">3</div>
+      <div><p class="text-sm font-headline font-bold leading-tight">Productos</p><p class="text-xs text-on-surface-variant">Importar catálogo</p></div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-4" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+    <div class="nav-item rounded-full px-4 py-3 flex items-center gap-3" id="nav-5">
+      <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0" id="nav-badge-5">4</div>
+      <div><p class="text-sm font-headline font-bold leading-tight">Análisis IA</p><p class="text-xs text-on-surface-variant">Configuración automática</p></div>
+      <span class="ml-auto material-symbols-outlined text-sm hidden text-tertiary" id="nav-check-5" style="font-variation-settings:'FILL' 1;">check_circle</span>
+    </div>
+  </nav>
+
+  <!-- Progress + user -->
+  <div class="px-6 mt-auto space-y-3">
+    <div class="p-4 rounded-2xl bg-surface-container-low">
+      <p class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Progreso</p>
+      <div class="w-full bg-outline-variant/40 h-1.5 rounded-full overflow-hidden">
+        <div class="bg-primary h-full rounded-full progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <p class="text-xs mt-2 text-on-surface-variant font-medium" id="progress-label">Paso 1 de 4</p>
+    </div>
+    <div class="flex items-center gap-3 p-3 rounded-2xl bg-surface-container-low" id="user-pill">
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white" id="user-avatar">
+        <span class="text-xs font-black" id="user-initial">?</span>
+      </div>
+      <div>
+        <span class="text-xs font-bold text-on-surface-variant block" id="user-pill-name">Cargando...</span>
+        <span class="text-[10px] text-on-surface-variant">OnceyDoce POS</span>
+      </div>
+      <button onclick="doLogout()" title="Cerrar sesión" class="ml-auto text-outline hover:text-error transition-colors">
+        <span class="material-symbols-outlined text-base">logout</span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 overflow-y-auto no-scrollbar bg-surface-container-low min-h-screen flex flex-col">
+
+  <!-- ================================================================
+       STEP 2 — BRAND / NEGOCIO
+       ================================================================ -->
+  <div class="step-panel flex-1 flex-col p-10 active" id="step-2">
+    <div class="max-w-4xl w-full mx-auto">
+      <header class="mb-10">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>Paso 1 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Tu identidad de marca</h2>
+        <p class="text-on-surface-variant text-lg">Así va a aparecer en tickets, reportes y el POS.</p>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+
+        <!-- Brand info -->
+        <div class="md:col-span-2 bg-surface-container-lowest rounded-2xl p-8 shadow-sm space-y-6">
+          <h3 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">palette</span>Información del negocio
+          </h3>
+
+          <div>
+            <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Nombre del negocio *</label>
+            <input id="biz-name" type="text" placeholder="Ej: OnceyDoce Bar & Café" oninput="updatePreview()"
+              class="w-full bg-surface-container-high border-2 border-transparent rounded-2xl py-3.5 px-4 font-headline font-bold text-on-surface placeholder:text-outline focus:border-primary focus:bg-white focus:ring-0 outline-none transition-all"/>
+          </div>
+
+          <!-- Biz type -->
+          <div>
+            <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-3 px-1">Tipo de negocio</label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectBizType(this,'cafe')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">local_cafe</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Café / Bar</span>
+              </button>
+              <button type="button" onclick="selectBizType(this,'restaurant')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">restaurant</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Restaurante</span>
+              </button>
+              <button type="button" onclick="selectBizType(this,'retail')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">storefront</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Retail</span>
+              </button>
+              <button type="button" onclick="selectBizType(this,'bakery')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">bakery_dining</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Panadería</span>
+              </button>
+              <button type="button" onclick="selectBizType(this,'bar')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">local_bar</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Bar</span>
+              </button>
+              <button type="button" onclick="selectBizType(this,'other')" class="biz-type-btn flex flex-col items-center gap-1.5 p-3.5 bg-surface-container-high rounded-2xl border-2 border-transparent">
+                <span class="biz-icon material-symbols-outlined text-xl text-on-surface-variant">more_horiz</span>
+                <span class="biz-label text-xs font-headline font-bold text-on-surface-variant">Otro</span>
+              </button>
+            </div>
+            <input type="hidden" id="biz-type" value=""/>
+          </div>
+
+          <!-- Color + currency -->
+          <div class="grid grid-cols-2 gap-5">
+            <div>
+              <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-3 px-1">Color principal</label>
+              <div class="flex flex-wrap gap-2.5">
+                <button type="button" onclick="selectColor(this,'#2b3896')" class="color-swatch w-9 h-9 rounded-full ring-2 ring-offset-2 ring-primary" style="background:#2b3896; --sw-color:#2b3896"></button>
+                <button type="button" onclick="selectColor(this,'#004c44')" class="color-swatch w-9 h-9 rounded-full" style="background:#004c44; --sw-color:#004c44"></button>
+                <button type="button" onclick="selectColor(this,'#823d00')" class="color-swatch w-9 h-9 rounded-full" style="background:#823d00; --sw-color:#823d00"></button>
+                <button type="button" onclick="selectColor(this,'#93000a')" class="color-swatch w-9 h-9 rounded-full" style="background:#93000a; --sw-color:#93000a"></button>
+                <button type="button" onclick="selectColor(this,'#1a237e')" class="color-swatch w-9 h-9 rounded-full" style="background:#1a237e; --sw-color:#1a237e"></button>
+                <button type="button" onclick="selectColor(this,'#3d454d')" class="color-swatch w-9 h-9 rounded-full flex items-center justify-center" style="background:#3d454d; --sw-color:#3d454d">
+                  <span class="material-symbols-outlined text-white text-xs">add</span>
+                </button>
+              </div>
+              <input type="hidden" id="biz-color" value="#2b3896"/>
+            </div>
+            <div>
+              <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Moneda</label>
+              <div class="relative">
+                <select id="biz-currency" class="w-full bg-surface-container-high border-2 border-transparent rounded-2xl py-3 pl-4 pr-8 text-sm font-bold text-on-surface focus:border-primary focus:bg-white focus:ring-0 appearance-none outline-none transition-all">
+                  <option value="ARS">ARS — Pesos arg.</option>
+                  <option value="USD">USD — Dólares</option>
+                  <option value="CLP">CLP — Pesos chil.</option>
+                  <option value="UYU">UYU — Pesos urug.</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-sm">expand_more</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Logo upload -->
+          <div>
+            <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Logo (opcional)</label>
+            <div onclick="document.getElementById('logo-input').click()" id="logo-dropzone"
+              class="border-2 border-dashed border-outline-variant rounded-2xl p-5 flex items-center gap-4 hover:bg-surface-container hover:border-primary/40 cursor-pointer transition-all group">
+              <div class="w-12 h-12 bg-surface-container rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined text-outline text-2xl" id="logo-icon">cloud_upload</span>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface" id="logo-text">Subir logo</p>
+                <p class="text-xs text-on-surface-variant">SVG, PNG o JPG — máx. 2MB</p>
+              </div>
+            </div>
+            <input type="file" id="logo-input" class="hidden" accept=".svg,.png,.jpg,.jpeg" onchange="handleLogo(this)"/>
+          </div>
+        </div>
+
+        <!-- Preview -->
+        <div class="flex flex-col gap-4">
+          <div class="rounded-2xl p-6 text-white flex flex-col items-center text-center justify-center min-h-[200px] relative overflow-hidden shadow-lg" id="preview-card" style="background:#2b3896">
+            <div class="absolute top-0 right-0 p-3 opacity-10">
+              <span class="material-symbols-outlined text-8xl">verified</span>
+            </div>
+            <div class="relative z-10">
+              <div class="w-16 h-16 bg-white/20 rounded-2xl mx-auto mb-3 flex items-center justify-center text-2xl font-headline font-black" id="preview-initial">?</div>
+              <p class="font-headline font-black text-lg leading-tight" id="preview-name">Tu negocio</p>
+              <p class="text-xs opacity-70 mt-1" id="preview-type">Tipo de negocio</p>
+            </div>
+          </div>
+          <div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm">
+            <p class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-2">Vista previa del ticket</p>
+            <div class="text-center border-t border-dashed border-outline-variant/50 pt-3 space-y-1">
+              <p class="font-headline font-bold text-sm text-on-surface" id="ticket-name">Tu negocio</p>
+              <p class="text-xs text-on-surface-variant">Gracias por su visita</p>
+              <p class="font-mono text-xs text-on-surface-variant mt-1">— — — — — — — —</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="saveBrand()" id="btn-save-brand" class="bg-primary text-on-primary px-10 py-3.5 rounded-full font-headline font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center gap-2 group">
+          Continuar<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       STEP 3 — TEAM
+       ================================================================ -->
+  <div class="step-panel flex-1 flex-col p-10" id="step-3">
+    <div class="max-w-3xl w-full mx-auto">
+      <header class="mb-10">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>Paso 2 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Invitá a tu equipo</h2>
+        <p class="text-on-surface-variant text-lg">Agregá a las personas que van a usar el POS. Podés saltear esto ahora.</p>
+      </header>
+
+      <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm mb-8">
+        <div class="flex justify-between items-center mb-6">
+          <div>
+            <h3 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">group</span>Colaboradores
+            </h3>
+            <p class="text-sm text-on-surface-variant mt-0.5">Van a recibir un email para unirse.</p>
+          </div>
+          <button onclick="addTeamRow()" class="flex items-center gap-2 px-5 py-2.5 bg-secondary-container/30 text-on-secondary-container hover:bg-secondary-container/50 rounded-full font-headline font-bold text-sm transition-all">
+            <span class="material-symbols-outlined text-sm">person_add</span>Agregar
+          </button>
+        </div>
+        <div id="team-rows" class="space-y-3">
+          <div class="team-row grid grid-cols-12 gap-3 items-center p-4 bg-surface-container-low rounded-2xl">
+            <div class="col-span-5">
+              <input type="email" placeholder="email@ejemplo.com" class="w-full bg-surface-container-lowest border-none rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
+            </div>
+            <div class="col-span-4">
+              <div class="relative">
+                <select class="w-full bg-surface-container-lowest border-none rounded-xl py-2.5 pl-3 pr-7 text-sm appearance-none focus:ring-2 focus:ring-primary outline-none">
+                  <option>Cajero/a</option><option>Gerente</option><option>Inventario</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-xs">expand_more</span>
+              </div>
+            </div>
+            <div class="col-span-3 flex justify-end gap-1">
+              <button onclick="this.closest('.team-row').remove()" class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-full transition-all">
+                <span class="material-symbols-outlined text-base">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 p-4 bg-surface-container-low rounded-2xl">
+          <p class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Roles disponibles</p>
+          <div class="grid grid-cols-3 gap-3 text-xs text-on-surface-variant">
+            <div class="flex items-start gap-2"><span class="material-symbols-outlined text-primary text-sm mt-0.5">star</span><div><p class="font-bold text-on-surface">Gerente</p><p>Acceso completo al POS y reportes</p></div></div>
+            <div class="flex items-start gap-2"><span class="material-symbols-outlined text-tertiary text-sm mt-0.5">point_of_sale</span><div><p class="font-bold text-on-surface">Cajero/a</p><p>Solo terminal y mesas</p></div></div>
+            <div class="flex items-start gap-2"><span class="material-symbols-outlined text-secondary text-sm mt-0.5">inventory_2</span><div><p class="font-bold text-on-surface">Inventario</p><p>Productos y stock</p></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-between">
+        <button onclick="showStep(2)" class="flex items-center gap-2 px-7 py-3 rounded-full font-bold hover:bg-surface-container transition-all active:scale-95">
+          <span class="material-symbols-outlined">arrow_back</span>Atrás
+        </button>
+        <div class="flex gap-3">
+          <button onclick="showStep(4)" class="text-sm text-on-surface-variant hover:text-on-surface font-semibold px-5 py-2.5 rounded-full hover:bg-surface-container transition-all">Saltar</button>
+          <button onclick="saveTeam()" class="bg-primary text-on-primary px-10 py-3.5 rounded-full font-headline font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center gap-2 group">
+            Continuar<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       STEP 4 — PRODUCTS IMPORT
+       ================================================================ -->
+  <div class="step-panel flex-1 flex-col p-10" id="step-4">
+    <div class="max-w-4xl w-full mx-auto">
+      <header class="mb-10">
+        <div class="inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>Paso 3 de 4
+        </div>
+        <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-2">Importá tus productos</h2>
+        <p class="text-on-surface-variant text-lg max-w-xl leading-relaxed">Subí tu catálogo. La IA detecta las columnas automáticamente.</p>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-4 space-y-4">
+          <div class="bg-surface-container p-6 rounded-2xl space-y-4 shadow-sm">
+            <h3 class="text-xs font-black text-primary flex items-center gap-2 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-base">table_chart</span>Columnas esperadas
+            </h3>
+            <ul class="space-y-2">
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span><span><strong class="text-on-surface">Nombre</strong> del producto</span></li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span><span><strong class="text-on-surface">Precio</strong> de venta</span></li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span><span><strong class="text-on-surface">Stock</strong> disponible</span></li>
+              <li class="flex items-center gap-2 text-sm text-on-surface-variant"><span class="material-symbols-outlined text-indigo-400 text-base">check_circle</span><span><strong class="text-on-surface">Categoría</strong> (opcional)</span></li>
+            </ul>
+            <button onclick="downloadTemplate()" class="w-full py-2.5 rounded-full border border-indigo-200 text-indigo-700 text-xs font-black flex items-center justify-center gap-2 hover:bg-indigo-50 transition-colors">
+              <span class="material-symbols-outlined text-sm">download</span>DESCARGAR PLANTILLA
+            </button>
+          </div>
+          <div class="bg-tertiary-container text-on-tertiary p-5 rounded-2xl">
+            <h4 class="text-sm font-bold mb-1 flex items-center gap-1"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">tips_and_updates</span>Tip</h4>
+            <p class="text-xs opacity-90 leading-relaxed">Los nombres de columnas no importan. La IA mapea automáticamente.</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8">
+          <div class="dropzone bg-surface-container-lowest rounded-2xl border-2 border-dashed border-outline-variant min-h-[300px] p-10 text-center cursor-pointer group hover:border-primary transition-colors flex flex-col items-center justify-center"
+               id="dropzone-4" onclick="document.getElementById('file-4').click()"
+               ondragover="ev(event,'dropzone-4')" ondragleave="lv('dropzone-4')" ondrop="dp(event,'file-4','dropzone-4',4)">
+            <div id="dz-4-empty" class="flex flex-col items-center">
+              <div class="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300">
+                <span class="material-symbols-outlined text-primary text-4xl" style="font-variation-settings:'wght' 200;">inventory_2</span>
+              </div>
+              <h3 class="text-xl font-headline font-bold text-on-surface mb-2">Subí tu lista de productos</h3>
+              <p class="text-on-surface-variant text-sm mb-5">Arrastrá o hacé clic para buscar</p>
+              <div class="flex gap-2">
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLSX</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.XLS</span>
+                <span class="px-3 py-1 rounded-full bg-surface-container text-on-surface-variant text-xs font-bold">.CSV</span>
+              </div>
+            </div>
+            <div id="dz-4-loaded" class="hidden flex-col items-center w-full">
+              <span class="material-symbols-outlined text-tertiary text-5xl mb-3 check-pop" style="font-variation-settings:'FILL' 1;">check_circle</span>
+              <h3 class="text-lg font-headline font-bold text-on-surface mb-2">Archivo cargado</h3>
+              <div class="chip-in inline-flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold">
+                <span class="material-symbols-outlined text-sm">table_chart</span>
+                <span id="filename-4">—</span>
+                <button onclick="clearFile(4,event)" class="material-symbols-outlined text-xs hover:text-error transition-colors">close</button>
+              </div>
+              <div id="preview-4" class="mt-4 w-full max-w-sm mx-auto"></div>
+            </div>
+            <input type="file" id="file-4" class="hidden" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(4,this)"/>
+          </div>
+
+          <div class="mt-6 flex items-center justify-between">
+            <button onclick="showStep(3)" class="flex items-center gap-2 px-7 py-3 rounded-full font-bold hover:bg-surface-container transition-all active:scale-95">
+              <span class="material-symbols-outlined">arrow_back</span>Atrás
+            </button>
+            <div class="flex gap-3">
+              <button onclick="skipStep5()" class="text-sm text-on-surface-variant font-semibold px-5 py-2.5 rounded-full hover:bg-surface-container transition-all">Saltar</button>
+              <button onclick="goStep5()" id="btn-step5" class="bg-primary text-on-primary px-10 py-3.5 rounded-full font-headline font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center gap-2 group">
+                Finalizar<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">auto_awesome</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       STEP 5 — AI + IMPORT
+       ================================================================ -->
+  <div class="step-panel flex-1 flex-col items-center justify-center p-10" id="step-5">
+    <div class="max-w-5xl w-full">
+
+      <!-- Loading -->
+      <div id="ai-loading" class="flex flex-col items-center justify-center py-20">
+        <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-primary text-5xl spin">progress_activity</span>
+        </div>
+        <h3 class="text-2xl font-headline font-bold text-on-surface mb-2">Analizando con IA...</h3>
+        <div class="flex gap-2 mt-3">
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+          <div class="pulse-dot w-2.5 h-2.5 bg-primary rounded-full"></div>
+        </div>
+        <p id="ai-status" class="mt-5 text-sm text-on-surface-variant text-center max-w-sm"></p>
+      </div>
+
+      <!-- Results -->
+      <div id="ai-results" class="hidden">
+        <header class="mb-8 text-center fade-up">
+          <div class="inline-flex items-center gap-2 bg-tertiary-container/20 text-tertiary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-4">
+            <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">check_circle</span>Listo
+          </div>
+          <h2 class="text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">¡Tu POS está configurado!</h2>
+          <p class="text-on-surface-variant text-lg max-w-xl mx-auto" id="ai-biz-type-text"></p>
+        </header>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="ai-metrics"></div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div class="lg:col-span-2 bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
+            <h3 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">psychology</span>Lo que detectó la IA
+            </h3>
+            <div id="ai-insights" class="space-y-3 text-sm text-on-surface-variant leading-relaxed"></div>
+          </div>
+          <div class="space-y-4">
+            <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
+              <h4 class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Categorías</h4>
+              <div id="ai-categories" class="space-y-2"></div>
+            </div>
+            <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
+              <h4 class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest mb-3">Métodos de pago</h4>
+              <div id="ai-payments" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8" id="ai-config"></div>
+
+        <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm mb-8">
+          <h3 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">upload</span>Importando a tu POS
+          </h3>
+          <div id="import-steps" class="space-y-3"></div>
+        </div>
+
+        <!-- CTA -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-8 bg-gradient-to-r from-primary to-primary-container rounded-2xl">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/20 text-white rounded-2xl flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' 1;">rocket_launch</span>
+            </div>
+            <div>
+              <p class="font-headline font-black text-white text-xl">¡Listo para vender!</p>
+              <p class="text-sm text-white/80 mt-0.5" id="cta-subtitle">Tu POS está configurado.</p>
+            </div>
+          </div>
+          <button onclick="goToDashboard()" class="w-full md:w-auto bg-white text-primary px-10 py-4 rounded-full font-headline font-extrabold text-base flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] active:scale-95 transition-all">
+            Ir al Dashboard<span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
+
+<script>
+  const API_URL = 'https://pulsoback.onrender.com';
+  const HEADERS = { 'Content-Type': 'application/json' };
+
+  // =====================================================================
+  // STATE
+  // =====================================================================
+  let currentStep    = 2;
+  let authToken      = null;
+  let authUser       = null;
+  let businessId     = null;
+  let bizType        = '';
+  let parsedProducts = null;
+
+  const STEP_CONFIG = {
+    2: { progress:'25%',  label:'Paso 1 de 4' },
+    3: { progress:'50%',  label:'Paso 2 de 4' },
+    4: { progress:'75%',  label:'Paso 3 de 4' },
+    5: { progress:'100%', label:'Paso 4 de 4' },
+  };
+
+  // =====================================================================
+  // GUARD — verificar sesión activa y que no haya setup completo
+  // =====================================================================
+  (function init() {
+    const token   = localStorage.getItem('od_token');
+    const userRaw = localStorage.getItem('od_user');
+    const bizId   = localStorage.getItem('od_business_id');
+
+    // Sin sesión → login
+    if (!token || !userRaw) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Ya tiene negocio configurado → dashboard (setup ya está completo)
+    if (bizId && localStorage.getItem('od_setup_complete') === 'true') {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Sesión válida, sin setup completo → continuar
+    authToken  = token;
+    authUser   = JSON.parse(userRaw);
+    businessId = bizId || null;
+
+    const name = `${authUser.firstName || ''} ${authUser.lastName || ''}`.trim() || authUser.email;
+    document.getElementById('user-pill-name').textContent = name;
+    document.getElementById('user-initial').textContent   = (authUser.firstName?.[0] || authUser.email?.[0] || '?').toUpperCase();
+
+    updateNav(2);
+  })();
+
+  // =====================================================================
+  // LOGOUT
+  // =====================================================================
+  function doLogout() {
+    localStorage.removeItem('od_token');
+    localStorage.removeItem('od_user');
+    localStorage.removeItem('od_business_id');
+    localStorage.removeItem('od_business');
+    localStorage.removeItem('od_setup_complete');
+    window.location.href = 'login.html';
+  }
+
+  // =====================================================================
+  // NAV
+  // =====================================================================
+  const NAV_STEPS = [2, 3, 4, 5];
+
+  function updateNav(step) {
+    NAV_STEPS.forEach(i => {
+      const nav   = document.getElementById(`nav-${i}`);
+      const badge = document.getElementById(`nav-badge-${i}`);
+      const check = document.getElementById(`nav-check-${i}`);
+      if (!nav) return;
+      nav.className = 'nav-item rounded-full px-4 py-3 flex items-center gap-3 cursor-pointer';
+      if (i === step) {
+        nav.classList.add('bg-indigo-50','text-indigo-700');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-primary text-white';
+      } else if (i < step) {
+        nav.classList.add('text-slate-500');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-slate-200 text-slate-500';
+        if (check) check.classList.remove('hidden');
+      } else {
+        nav.classList.add('text-slate-400');
+        badge.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 bg-slate-100 text-slate-400';
+        if (check) check.classList.add('hidden');
+      }
+    });
+    const cfg = STEP_CONFIG[step];
+    if (cfg) {
+      document.getElementById('progress-bar').style.width  = cfg.progress;
+      document.getElementById('progress-label').textContent = cfg.label;
+    }
+  }
+
+  function showStep(s) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`step-${s}`).classList.add('active');
+    currentStep = s;
+    updateNav(s);
+    if (s === 5) startAI();
+  }
+
+  function tryGoTo(s) {
+    if (s > currentStep) return;
+    showStep(s);
+  }
+
+  // =====================================================================
+  // STEP 2 — BRAND
+  // =====================================================================
+  function selectBizType(btn, type) {
+    document.querySelectorAll('.biz-type-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    bizType = type;
+    document.getElementById('biz-type').value = type;
+    updatePreview();
+  }
+
+  function selectColor(btn, color) {
+    document.querySelectorAll('.color-swatch').forEach(b => b.style.boxShadow = '');
+    btn.style.boxShadow = `0 0 0 2px white, 0 0 0 4px ${color}`;
+    document.getElementById('biz-color').value = color;
+    document.getElementById('preview-card').style.background = color;
+  }
+
+  function updatePreview() {
+    const name = document.getElementById('biz-name').value || 'Tu negocio';
+    const initial = name[0]?.toUpperCase() || '?';
+    const typeLabels = { cafe:'Café / Bar', restaurant:'Restaurante', retail:'Retail', bakery:'Panadería', bar:'Bar', other:'Negocio' };
+    document.getElementById('preview-name').textContent    = name;
+    document.getElementById('preview-initial').textContent = initial;
+    document.getElementById('preview-type').textContent    = typeLabels[bizType] || 'Tipo de negocio';
+    document.getElementById('ticket-name').textContent     = name;
+  }
+
+  function handleLogo(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    document.getElementById('logo-icon').textContent  = 'check_circle';
+    document.getElementById('logo-text').textContent  = file.name;
+    document.getElementById('preview-initial').innerHTML = `<img src="${url}" class="w-full h-full object-cover rounded-xl"/>`;
+  }
+
+  async function saveBrand() {
+    const name = document.getElementById('biz-name').value.trim();
+    if (!name) { showToast('warn','Ingresá el nombre del negocio'); return; }
+
+    setBtnLoading('btn-save-brand', true, 'Guardando...');
+    try {
+      const res = await fetch(`${API_URL}/businesses`, {
+        method: 'POST', headers: authHeaders(),
+        body: JSON.stringify({
+          name,
+          businessType: bizType,
+          brandColor:   document.getElementById('biz-color').value,
+          currency:     document.getElementById('biz-currency').value,
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Error creando el negocio');
+      }
+      const biz = await res.json();
+      businessId = biz.id;
+      localStorage.setItem('od_business_id', businessId);
+      showToast('ok', 'Negocio creado');
+      showStep(3);
+    } catch(e) {
+      showToast('warn', e.message);
+    } finally {
+      setBtnLoading('btn-save-brand', false);
+    }
+  }
+
+  // =====================================================================
+  // STEP 3 — TEAM
+  // =====================================================================
+  function addTeamRow() {
+    const row = document.createElement('div');
+    row.className = 'team-row grid grid-cols-12 gap-3 items-center p-4 bg-surface-container-low rounded-2xl';
+    row.innerHTML = `
+      <div class="col-span-5">
+        <input type="email" placeholder="email@ejemplo.com" class="w-full bg-surface-container-lowest border-none rounded-xl py-2.5 px-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
+      </div>
+      <div class="col-span-4">
+        <div class="relative">
+          <select class="w-full bg-surface-container-lowest border-none rounded-xl py-2.5 pl-3 pr-7 text-sm appearance-none focus:ring-2 focus:ring-primary outline-none">
+            <option>Cajero/a</option><option>Gerente</option><option>Inventario</option>
+          </select>
+          <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-outline text-xs">expand_more</span>
+        </div>
+      </div>
+      <div class="col-span-3 flex justify-end">
+        <button onclick="this.closest('.team-row').remove()" class="p-2 text-on-surface-variant hover:text-error hover:bg-error-container/30 rounded-full transition-all">
+          <span class="material-symbols-outlined text-base">delete</span>
+        </button>
+      </div>`;
+    document.getElementById('team-rows').appendChild(row);
+  }
+
+  async function saveTeam() {
+    const rows = document.querySelectorAll('.team-row');
+    const invites = [];
+    rows.forEach(row => {
+      const email = row.querySelector('input[type="email"]')?.value?.trim();
+      const role  = row.querySelector('select')?.value;
+      if (email) invites.push({ email, role });
+    });
+    localStorage.setItem('od_team_invites', JSON.stringify(invites));
+    if (invites.length > 0) showToast('ok', `${invites.length} invitación${invites.length > 1 ? 'es' : ''} guardada${invites.length > 1 ? 's' : ''}`);
+    showStep(4);
+  }
+
+  // =====================================================================
+  // STEP 4 — FILE HANDLING
+  // =====================================================================
+  function ev(e, id) { e.preventDefault(); document.getElementById(id).classList.add('dragover'); }
+  function lv(id)    { document.getElementById(id).classList.remove('dragover'); }
+  function dp(e, inputId, dropId, n) {
+    e.preventDefault(); lv(dropId);
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(n, file);
+  }
+
+  function handleFileSelect(n, input) {
+    const file = input.files[0];
+    if (file) processFile(n, file);
+  }
+
+  function clearFile(n, e) {
+    e.stopPropagation();
+    parsedProducts = null;
+    document.getElementById(`dz-${n}-empty`).classList.remove('hidden');
+    document.getElementById(`dz-${n}-loaded`).classList.add('hidden');
+    document.getElementById(`file-${n}`).value = '';
+  }
+
+  function processFile(n, file) {
+    document.getElementById(`filename-${n}`).textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        let json;
+        if (file.name.toLowerCase().endsWith('.csv')) {
+          const text = new TextDecoder().decode(new Uint8Array(evt.target.result));
+          json = XLSX.utils.sheet_to_json(XLSX.read(text, { type:'string' }).Sheets[XLSX.read(text, { type:'string' }).SheetNames[0]]);
+        } else {
+          const wb = XLSX.read(new Uint8Array(evt.target.result), { type:'array' });
+          json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        }
+        parsedProducts = json;
+        showPreview(n, json);
+        document.getElementById(`dz-${n}-empty`).classList.add('hidden');
+        const loaded = document.getElementById(`dz-${n}-loaded`);
+        loaded.classList.remove('hidden');
+        loaded.classList.add('flex');
+      } catch(err) { showToast('warn','Error leyendo el archivo'); console.error(err); }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function showPreview(n, json) {
+    const cols = json.length > 0 ? Object.keys(json[0]) : [];
+    document.getElementById(`preview-${n}`).innerHTML = `
+      <div class="bg-indigo-50 rounded-xl p-3 text-xs text-indigo-700 font-medium">
+        <div class="flex justify-between mb-1.5"><span class="font-black">${json.length} filas</span><span>${cols.length} columnas</span></div>
+        <div class="flex flex-wrap gap-1">${cols.slice(0,5).map(c=>`<span class="bg-white px-2 py-0.5 rounded-full">${c}</span>`).join('')}${cols.length>5?`<span class="bg-white px-2 py-0.5 rounded-full">+${cols.length-5}</span>`:''}</div>
+      </div>`;
+  }
+
+  function downloadTemplate() {
+    const wb = XLSX.utils.book_new();
+    const data = [
+      ['Nombre','Descripción','Precio','Stock','Categoría'],
+      ['Café con leche','Espresso con leche',350,100,'Bebidas'],
+      ['Medialunas x3','Tres medialunas de manteca',250,80,'Panadería'],
+      ['Tostado jamón y queso','Pan con jamón y queso',450,50,'Comidas'],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{wch:25},{wch:30},{wch:10},{wch:8},{wch:15}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Productos');
+    XLSX.writeFile(wb, 'Plantilla_OnceyDoce.xlsx');
+  }
+
+  // =====================================================================
+  // STEP 4 → 5 TRANSITION
+  // =====================================================================
+  async function goStep5() {
+    setBtnLoading('btn-step5', true, 'Procesando...');
+    if (parsedProducts && parsedProducts.length > 0 && businessId) {
+      try {
+        await doImportProducts();
+        showToast('ok', parsedProducts.length + ' productos enviados al servidor');
+      } catch(e) {
+        showToast('warn', 'Advertencia: ' + e.message);
+        console.error('Import before AI:', e);
+      }
+    }
+    setBtnLoading('btn-step5', false);
+    showStep(5);
+  }
+
+  function skipStep5() {
+    parsedProducts = null;
+    showStep(5);
+  }
+
+  // =====================================================================
+  // STEP 5 — AI ANALYSIS
+  // =====================================================================
+  async function startAI() {
+    document.getElementById('ai-loading').classList.remove('hidden');
+    document.getElementById('ai-results').classList.add('hidden');
+
+    const statuses = [
+      'Detectando estructura de datos...', 'Identificando categorías de productos...',
+      'Analizando métodos de pago...', 'Calculando métricas del negocio...',
+      'Generando configuración del POS...',
+    ];
+    const statusEl = document.getElementById('ai-status');
+    for (const s of statuses) { await sleep(650); statusEl.textContent = s; }
+
+    const bizName    = document.getElementById('biz-name').value || 'Mi negocio';
+    const prodSample = parsedProducts ? JSON.stringify(parsedProducts.slice(0,12)) : '[]';
+    const hasProds   = parsedProducts?.length > 0;
+
+    const prompt = `Sos asistente de configuración de POS para un negocio gastronómico/retail.
+NEGOCIO: "${bizName}" (tipo: "${bizType || 'general'}")
+${hasProds ? `PRODUCTOS (primeras filas): ${prodSample}` : 'Sin productos subidos.'}
+Respondé SOLO con JSON sin markdown:
+{
+  "tipoNegocio": "descripción del tipo",
+  "insight1": "observación sobre el negocio (1-2 oraciones)",
+  "insight2": "patrón o oportunidad (1-2 oraciones)",
+  "insight3": "recomendación para el POS (1-2 oraciones)",
+  "totalProductos": número o null,
+  "ventaPromedio": número en pesos o null,
+  "categorias": ["cat1","cat2","cat3"],
+  "metodosPago": ["Efectivo","Tarjeta","QR"],
+  "configRecomendada": [
+    {"titulo":"string","descripcion":"corto","icono":"material-icon","valor":"string"},
+    {"titulo":"string","descripcion":"corto","icono":"material-icon","valor":"string"},
+    {"titulo":"string","descripcion":"corto","icono":"material-icon","valor":"string"}
+  ]
+}`;
+
+    let result;
+    try {
+      const res  = await fetch(`${API_URL}/ai`, {
+        method: 'POST', headers: { ...HEADERS },
+        body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+      });
+      const data = await res.json();
+      const text = data.content?.map(i => i.text || '').join('').replace(/```json|```/g,'').trim();
+      result = JSON.parse(text);
+    } catch(err) {
+      console.warn('AI fallback:', err);
+      result = {
+        tipoNegocio: bizType==='cafe' ? 'Café / Bar' : 'Gastronomía',
+        insight1: `${bizName} tiene un catálogo ideal para el POS. La búsqueda rápida va a ser clave en hora pico.`,
+        insight2: 'Activá las alertas de stock bajo para no quedar sin producto en momentos de alta demanda.',
+        insight3: 'Configuramos atajos de teclado para tus 12 productos más vendidos y cierre de caja automático.',
+        totalProductos: parsedProducts?.length ?? 0,
+        ventaPromedio: 850,
+        categorias: ['Bebidas','Comidas','Postres'],
+        metodosPago: ['Efectivo','Tarjeta','QR / Transferencia'],
+        configRecomendada: [
+          {titulo:'Pantalla rápida',descripcion:'Top 12 productos en 1 click',icono:'touch_app',valor:'Activada'},
+          {titulo:'Cierre de caja',descripcion:'Reporte automático diario',icono:'point_of_sale',valor:'22:00 hs'},
+          {titulo:'Alertas stock',descripcion:'Notificación cuando baje el stock',icono:'inventory',valor:'≤ 5 unid.'},
+        ]
+      };
+    }
+
+    await renderAI(result);
+    await runImport(result);
+  }
+
+  async function renderAI(r) {
+    document.getElementById('ai-loading').classList.add('hidden');
+    document.getElementById('ai-results').classList.remove('hidden');
+    document.getElementById('ai-biz-type-text').textContent = r.tipoNegocio;
+
+    const mg = document.getElementById('ai-metrics');
+    mg.innerHTML = '';
+    [{label:'Tipo',value:r.tipoNegocio,icon:'store'},{label:'Productos',value:r.totalProductos??parsedProducts?.length??'—',icon:'inventory_2'},{label:'Ticket promedio',value:r.ventaPromedio?`$${r.ventaPromedio.toLocaleString('es-AR')}`:'—',icon:'payments'},{label:'Categorías',value:(r.categorias||[]).length,icon:'category'}]
+      .forEach((m,i) => {
+        const d = document.createElement('div');
+        d.className = 'card-in bg-surface-container-lowest rounded-2xl p-5 shadow-sm';
+        d.style.animationDelay = `${i*.08}s`;
+        d.innerHTML = `<div class="flex items-center justify-between mb-2"><span class="text-[10px] font-black text-on-surface-variant uppercase tracking-widest">${m.label}</span><span class="material-symbols-outlined text-primary text-base">${m.icon}</span></div><span class="text-xl font-headline font-extrabold text-on-surface">${m.value}</span>`;
+        mg.appendChild(d);
+      });
+
+    const ins = document.getElementById('ai-insights');
+    ins.innerHTML = '';
+    for (const t of [r.insight1,r.insight2,r.insight3].filter(Boolean)) {
+      await sleep(150);
+      const p = document.createElement('p'); p.className = 'slide-in'; p.textContent = t;
+      ins.appendChild(p);
+    }
+
+    document.getElementById('ai-categories').innerHTML = (r.categorias||[]).length
+      ? r.categorias.map(c=>`<div class="flex items-center gap-2 text-sm"><span class="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span><span class="text-on-surface-variant">${c}</span></div>`).join('')
+      : '<p class="text-xs text-on-surface-variant">No detectadas</p>';
+
+    const payIcons = {efectivo:'payments',tarjeta:'credit_card',transferencia:'account_balance',qr:'qr_code'};
+    document.getElementById('ai-payments').innerHTML = (r.metodosPago||[]).length
+      ? r.metodosPago.map(p=>{const k=Object.keys(payIcons).find(k=>p.toLowerCase().includes(k));return`<div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-indigo-400 text-base">${k?payIcons[k]:'paid'}</span><span class="text-on-surface-variant">${p}</span></div>`}).join('')
+      : '<p class="text-xs text-on-surface-variant">No detectados</p>';
+
+    const cc = document.getElementById('ai-config');
+    cc.innerHTML = '';
+    (r.configRecomendada||[]).forEach((c,i) => {
+      const d = document.createElement('div');
+      d.className = 'card-in bg-surface-container-lowest rounded-2xl p-6 shadow-sm border border-outline-variant/20';
+      d.style.animationDelay = `${.3+i*.1}s`;
+      d.innerHTML = `<div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center mb-4"><span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">${c.icono}</span></div><h4 class="font-headline font-bold text-on-surface mb-1">${c.titulo}</h4><p class="text-xs text-on-surface-variant mb-3">${c.descripcion}</p><span class="inline-block bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">${c.valor}</span>`;
+      cc.appendChild(d);
+    });
+  }
+
+  async function runImport(r) {
+    const steps = [];
+    if (parsedProducts?.length > 0) steps.push({id:'imp-p',label:`Importar ${parsedProducts.length} productos`,icon:'inventory_2'});
+    steps.push({id:'imp-cfg',label:'Guardar configuración del POS',icon:'settings'});
+
+    const el = document.getElementById('import-steps');
+    el.innerHTML = steps.map(s=>`
+      <div class="import-chip flex items-center gap-3" id="${s.id}">
+        <div class="status-icon bg-surface-container text-on-surface-variant"><span class="material-symbols-outlined text-sm">hourglass_empty</span></div>
+        <span class="material-symbols-outlined text-on-surface-variant text-base">${s.icon}</span>
+        <span class="text-sm text-on-surface-variant font-medium flex-1">${s.label}</span>
+        <span class="text-xs text-on-surface-variant font-medium" id="${s.id}-st">Pendiente</span>
+      </div>`).join('');
+
+    for (const s of steps) {
+      await sleep(500);
+      setIS(s.id, 'loading', 'Importando...');
+      try {
+        if (s.id === 'imp-p')   await doImportProducts();
+        if (s.id === 'imp-cfg') await doSaveConfig(r);
+        setIS(s.id, 'done', 'Listo ✓');
+      } catch(e) {
+        setIS(s.id, 'error', 'Error');
+        console.error(s.id, e);
+      }
+    }
+    const count = parsedProducts?.length ?? 0;
+    document.getElementById('cta-subtitle').textContent = count > 0
+      ? `${count} productos importados y POS configurado.`
+      : 'POS configurado. Agregá productos desde Inventario.';
+  }
+
+  function setIS(id, status, label) {
+    const el   = document.getElementById(id);
+    const icon = el.querySelector('.status-icon');
+    const st   = document.getElementById(`${id}-st`);
+    st.textContent = label;
+    if (status==='loading') { icon.className='status-icon bg-primary/10 text-primary'; icon.innerHTML='<span class="material-symbols-outlined text-sm spin" style="display:block">progress_activity</span>'; st.className='text-xs text-primary font-bold'; }
+    else if(status==='done'){ icon.className='status-icon bg-tertiary/10 text-tertiary check-pop'; icon.innerHTML='<span class="material-symbols-outlined text-sm" style="font-variation-settings:\'FILL\' 1;">check_circle</span>'; st.className='text-xs text-tertiary font-bold'; }
+    else                    { icon.className='status-icon bg-error-container text-error'; icon.innerHTML='<span class="material-symbols-outlined text-sm">error</span>'; st.className='text-xs text-error font-bold'; }
+  }
+
+  async function doImportProducts() {
+    if (!parsedProducts?.length) return;
+    const products = parsedProducts.map(row => {
+      const keys = Object.keys(row);
+      const nk = keys.find(k=>/nombre|name|producto|item/i.test(k))||keys[0];
+      const pk = keys.find(k=>/precio|price|valor/i.test(k));
+      const sk = keys.find(k=>/stock|cantidad|qty/i.test(k));
+      const ck = keys.find(k=>/categ|tipo|type/i.test(k));
+      const dk = keys.find(k=>/desc/i.test(k));
+      return {
+        nombre:      String(row[nk]||'').trim(),
+        precio:      parseFloat(String(pk?row[pk]:0).replace(/[^0-9.]/g,''))||0,
+        stock:       parseInt(String(sk?row[sk]:0))||0,
+        categoria:   ck?String(row[ck]||'General'):'General',
+        descripcion: dk?String(row[dk]||''):'',
+      };
+    }).filter(p => p.nombre);
+
+    const headers = { ...authHeaders(), 'x-business-id': businessId || '' };
+    const res = await fetch(`${API_URL}/import/products`, {
+      method:'POST', headers,
+      body: JSON.stringify({ products })
+    });
+    if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.message||`HTTP ${res.status}`); }
+  }
+
+  async function doSaveConfig(r) {
+    const config = {
+      tipoNegocio: r.tipoNegocio,
+      categorias:  r.categorias||[],
+      metodosPago: r.metodosPago||[],
+      configRecomendada: r.configRecomendada||[],
+      businessName: document.getElementById('biz-name').value,
+      businessType: bizType,
+      currency:     document.getElementById('biz-currency').value,
+      setupAt:      new Date().toISOString(),
+    };
+    localStorage.setItem('onceydoce_config', JSON.stringify(config));
+
+    if (businessId && authToken) {
+      await fetch(`${API_URL}/businesses/${businessId}/pos-config`, {
+        method:'POST', headers: authHeaders(),
+        body: JSON.stringify({ config })
+      }).catch(() => {});
+    }
+    await sleep(400);
+  }
+
+  // =====================================================================
+  // DASHBOARD REDIRECT
+  // =====================================================================
+  function goToDashboard() {
+    if (parsedProducts && parsedProducts.length > 0) {
+      localStorage.setItem('od_products', JSON.stringify(parsedProducts));
+    }
+    if (businessId) localStorage.setItem('od_business_id', businessId);
+    if (authToken)  localStorage.setItem('od_token', authToken);
+    localStorage.setItem('od_setup_complete', 'true');
+    window.location.href = 'index.html';
+  }
+
+  // =====================================================================
+  // HELPERS
+  // =====================================================================
+  function authHeaders() {
+    return { ...HEADERS, 'Authorization': `Bearer ${authToken}` };
+  }
+
+  function setBtnLoading(id, loading, text) {
+    if (!id) return;
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.disabled = loading;
+    if (loading) { btn.dataset.orig = btn.innerHTML; btn.innerHTML = `<span class="material-symbols-outlined text-sm spin">progress_activity</span>${text || 'Cargando...'}`;
+    } else if (btn.dataset.orig) btn.innerHTML = btn.dataset.orig;
+  }
+
+  function showToast(type, msg) {
+    const toast = document.getElementById('toast');
+    const icons = { ok:'check_circle', warn:'warning' };
+    toast.innerHTML = `<span class="material-symbols-outlined text-sm">${icons[type]||'info'}</span>${msg}`;
+    toast.style.opacity = '1';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.style.opacity = '0', 3000);
+  }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

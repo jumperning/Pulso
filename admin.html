@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>SaaS Control | Super Admin</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <script id="tailwind-config">
+    tailwind.config = {
+      content: [],
+      theme: {
+        extend: {
+          colors: {
+            primary: "#2b3896",
+            "on-primary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#e9f6fd",
+            "surface-container": "#e3f0f8",
+            "on-surface": "#111d23",
+            "on-surface-variant": "#454652",
+            "outline": "#757684",
+          },
+          fontFamily: {
+            headline: ["Manrope"],
+            body: ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-headline { font-family: 'Manrope', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="bg-[#f4faff] text-on-surface min-h-screen">
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-0 h-screen w-72 bg-slate-100 border-r border-slate-200 flex flex-col z-50">
+  <div class="p-8">
+    <h1 class="text-3xl font-black text-indigo-700">SaaS Control</h1>
+    <p class="text-sm text-slate-500 mt-1">Super Admin Console</p>
+  </div>
+
+  <nav class="flex-1 px-4 space-y-1">
+    <a href="#" class="flex items-center gap-3 px-6 py-4 bg-white rounded-2xl font-bold text-primary shadow-sm">
+      <span class="material-symbols-outlined">storefront</span>
+      <span>Merchants</span>
+    </a>
+    <a href="#" class="flex items-center gap-3 px-6 py-4 text-slate-600 hover:bg-slate-200 rounded-2xl transition-colors">
+      <span class="material-symbols-outlined">analytics</span>
+      <span>Analytics</span>
+    </a>
+    <a href="#" class="flex items-center gap-3 px-6 py-4 text-slate-600 hover:bg-slate-200 rounded-2xl transition-colors">
+      <span class="material-symbols-outlined">people</span>
+      <span>Usuarios</span>
+    </a>
+    <a href="#" class="flex items-center gap-3 px-6 py-4 text-slate-600 hover:bg-slate-200 rounded-2xl transition-colors">
+      <span class="material-symbols-outlined">settings</span>
+      <span>Configuración</span>
+    </a>
+  </nav>
+
+  <div class="p-6 border-t border-slate-200">
+    <div class="text-xs text-slate-500 px-2">Conectado como</div>
+    <div class="flex items-center gap-3 mt-2">
+      <div class="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white font-bold">SA</div>
+      <div>
+        <div class="font-semibold text-sm">Super Admin</div>
+        <div class="text-xs text-slate-500">admin@saascontrol.com</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-72 p-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-end mb-10">
+      <div>
+        <h1 class="text-4xl font-headline font-black text-on-surface">Merchants Directory</h1>
+        <p class="text-on-surface-variant mt-1">Gestión completa de todas las tiendas</p>
+      </div>
+      <button onclick="openCreateModal()" 
+        class="bg-primary text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all">
+        <span class="material-symbols-outlined">add</span>
+        Nueva Tienda
+      </button>
+    </div>
+
+    <!-- Stats Cards -->
+    <div id="stats-cards" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+      <!-- Se llenan con JavaScript -->
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+      <div class="p-6 border-b flex items-center justify-between">
+        <h3 class="font-headline font-bold text-xl">Todas las Tiendas</h3>
+        <input id="search-input" 
+          onkeyup="filterTable()" 
+          placeholder="Buscar por nombre o slug..." 
+          class="w-80 px-4 py-2 bg-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"/>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-6 py-5 text-left text-xs font-bold text-slate-500">TIENDA</th>
+              <th class="px-6 py-5 text-left text-xs font-bold text-slate-500">TIPO</th>
+              <th class="px-6 py-5 text-left text-xs font-bold text-slate-500">CREACIÓN</th>
+              <th class="px-6 py-5 text-center text-xs font-bold text-slate-500">ÓRDENES ACTIVAS</th>
+              <th class="px-6 py-5 text-center text-xs font-bold text-slate-500">PRODUCTOS</th>
+              <th class="px-6 py-5 text-right text-xs font-bold text-slate-500">ACCIONES</th>
+            </tr>
+          </thead>
+          <tbody id="business-table" class="divide-y divide-slate-100">
+            <!-- Se llena con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal Crear Nueva Tienda -->
+<div id="create-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-[100]">
+  <div class="bg-white rounded-3xl w-full max-w-md p-8">
+    <h2 class="text-2xl font-headline font-bold mb-6">Crear Nueva Tienda</h2>
+    
+    <div class="space-y-5">
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-2">NOMBRE DE LA TIENDA</label>
+        <input id="biz-name" type="text" 
+          class="w-full px-5 py-4 bg-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Ej: Café del Sol"/>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-500 mb-2">TIPO DE NEGOCIO</label>
+        <select id="biz-type" class="w-full px-5 py-4 bg-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary">
+          <option value="cafe">Café / Bar</option>
+          <option value="restaurant">Restaurante</option>
+          <option value="store">Tienda Retail</option>
+          <option value="other">Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-8">
+      <button onclick="closeCreateModal()" 
+        class="flex-1 py-4 font-bold text-slate-600 bg-slate-100 rounded-2xl hover:bg-slate-200 transition">
+        Cancelar
+      </button>
+      <button onclick="createBusiness()" 
+        class="flex-1 py-4 font-bold text-white bg-primary rounded-2xl hover:bg-indigo-700 transition">
+        Crear Tienda
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-2">
+  <span id="toast-text"></span>
+</div>
+
+<script>
+// ==================== CONFIG ====================
+const API_URL = 'https://pulsoback.onrender.com';
+
+// ==================== CARGAR DATOS ====================
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API_URL}/admin/businesses`);
+    const businesses = await res.json();
+
+    const statsRes = await fetch(`${API_URL}/admin/stats`);
+    const stats = await statsRes.json();
+
+    renderStats(stats);
+    renderBusinessTable(businesses);
+  } catch (e) {
+    console.error(e);
+    showToast("Error al cargar datos del servidor");
+  }
+}
+
+function renderStats(stats) {
+  const html = `
+    <div class="bg-white p-6 rounded-3xl shadow-sm">
+      <p class="text-sm text-slate-500">Total Tiendas</p>
+      <p class="text-4xl font-bold mt-2">${stats.total_businesses}</p>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-sm">
+      <p class="text-sm text-slate-500">Órdenes Activas</p>
+      <p class="text-4xl font-bold mt-2 text-amber-600">${stats.total_active_orders}</p>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-sm">
+      <p class="text-sm text-slate-500">Promedio Productos por Tienda</p>
+      <p class="text-4xl font-bold mt-2">${Math.round(stats.businesses.reduce((a,b)=>a+b.total_products,0)/stats.total_businesses) || 0}</p>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-sm">
+      <p class="text-sm text-slate-500">Tiendas sin Productos</p>
+      <p class="text-4xl font-bold mt-2 text-red-600">${stats.businesses.filter(b => b.total_products === 0).length}</p>
+    </div>
+  `;
+  document.getElementById('stats-cards').innerHTML = html;
+}
+
+function renderBusinessTable(businesses) {
+  const tbody = document.getElementById('business-table');
+  tbody.innerHTML = businesses.map(biz => `
+    <tr class="hover:bg-slate-50 transition-colors">
+      <td class="px-6 py-6">
+        <div class="font-semibold">${biz.name}</div>
+        <div class="text-xs text-slate-500">${biz.slug}</div>
+      </td>
+      <td class="px-6 py-6">
+        <span class="px-4 py-1 text-xs font-bold rounded-full bg-indigo-100 text-indigo-700">${biz.business_type || 'General'}</span>
+      </td>
+      <td class="px-6 py-6 text-sm text-slate-600">
+        ${new Date(biz.created_at).toLocaleDateString('es-AR')}
+      </td>
+      <td class="px-6 py-6 text-center">
+        <span class="inline-flex items-center gap-1 font-bold text-amber-600">
+          ${biz.active_orders || 0}
+          <span class="text-xs text-slate-400">activas</span>
+        </span>
+      </td>
+      <td class="px-6 py-6 text-center">
+        <span class="${biz.total_products > 0 ? 'text-emerald-600' : 'text-red-600'} font-bold">
+          ${biz.total_products || 0}
+        </span>
+      </td>
+      <td class="px-6 py-6 text-right">
+        <button onclick="viewBusiness('${biz.id}')" 
+          class="px-5 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-xl transition">
+          Ver Detalle
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterTable() {
+  const term = document.getElementById('search-input').value.toLowerCase();
+  const rows = document.querySelectorAll('#business-table tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(term) ? '' : 'none';
+  });
+}
+
+// ==================== MODAL CREAR TIENDA ====================
+function openCreateModal() {
+  document.getElementById('create-modal').classList.remove('hidden');
+  document.getElementById('biz-name').focus();
+}
+
+function closeCreateModal() {
+  document.getElementById('create-modal').classList.add('hidden');
+}
+
+async function createBusiness() {
+  const name = document.getElementById('biz-name').value.trim();
+  const type = document.getElementById('biz-type').value;
+
+  if (!name) {
+    showToast("El nombre de la tienda es obligatorio");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/admin/businesses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, businessType: type })
+    });
+
+    if (res.ok) {
+      showToast("¡Tienda creada correctamente!");
+      closeCreateModal();
+      loadDashboard(); // recargar tabla
+    } else {
+      showToast("Error al crear la tienda");
+    }
+  } catch (e) {
+    showToast("Error de conexión");
+  }
+}
+
+// ==================== TOAST ====================
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = message;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 3000);
+}
+
+// ==================== INIT ====================
+window.onload = loadDashboard;
+
+function viewBusiness(id) {
+  alert(`Ver detalle de tienda ID: ${id}\n\n(Esta función se puede expandir más adelante)`);
+}
+</script>
+</body>
+</html>
