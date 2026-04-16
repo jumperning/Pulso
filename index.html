@@ -557,7 +557,7 @@ function timeAgo(dateString) {
    * Devuelve el item con su ID para guardarlo localmente.
    */
   window.addToCart = async (productId) => {
-    const p = allProducts.find(x => x.id === productId);
+   const p = allProducts.find(x => String(x.id) === String(productId));
     if (!p || p.stock === 0 || !window._currentTable) return;
 
     // Optimistic: agregar localmente primero para que se vea inmediato
