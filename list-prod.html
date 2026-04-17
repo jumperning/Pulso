@@ -380,8 +380,8 @@ console.log('BUSINESS ID:', business_id);
 
   function updateStats() {
     const total = allProducts.length;
-    const low   = allProducts.filter(p => (p.stock_quantity || 0) > 0 && (p.stock_quantity || 0) < 5).length;
-    const out   = allProducts.filter(p => (p.stock_quantity || 0) <= 0).length;
+    const low   = allProducts.filter(p => (p.stock || 0) > 0 && (p.stock || 0) < 5).length;
+    const out   = allProducts.filter(p => (p.stock || 0) <= 0).length;
     document.getElementById('stat-total').textContent = `${total} producto${total !== 1 ? 's' : ''}`;
     document.getElementById('stat-low').textContent   = `${low} bajo stock`;
     document.getElementById('stat-out').textContent   = `${out} sin stock`;
@@ -406,7 +406,7 @@ console.log('BUSINESS ID:', business_id);
     const sort = document.getElementById('sort-select').value;
 
     let list = allProducts.filter(p => {
-      const stock = p.stock_quantity || 0;
+      const stock = p.stock || 0;
       const matchSearch = !q || p.name.toLowerCase().includes(q) || (p.category || '').toLowerCase().includes(q);
       const matchCat    = !cat || p.category === cat;
       const matchStock  = stockFilter === 'all'
@@ -421,8 +421,8 @@ console.log('BUSINESS ID:', business_id);
       if (sort === 'name_desc')  return b.name.localeCompare(a.name);
       if (sort === 'price_asc')  return (a.price || 0) - (b.price || 0);
       if (sort === 'price_desc') return (b.price || 0) - (a.price || 0);
-      if (sort === 'stock_asc')  return (a.stock_quantity || 0) - (b.stock_quantity || 0);
-      if (sort === 'stock_desc') return (b.stock_quantity || 0) - (a.stock_quantity || 0);
+      if (sort === 'stock_asc')  return (a.stock || 0) - (b.stock || 0);
+      if (sort === 'stock_desc') return (b.stock || 0) - (a.stock || 0);
       return 0;
     });
 
@@ -451,7 +451,7 @@ console.log('BUSINESS ID:', business_id);
     countEl.textContent = `Mostrando ${products.length} de ${allProducts.length} productos`;
 
     tbody.innerHTML = products.map((p, i) => {
-      const stock = p.stock_quantity || 0;
+      const stock = p.stock || 0;
       const isFav = p.is_favorite || false;
 
       let stockBadge, dotClass;
@@ -531,7 +531,7 @@ console.log('BUSINESS ID:', business_id);
       document.getElementById('form-id').value               = p.id;
       document.getElementById('form-name').value             = p.name;
       document.getElementById('form-price').value            = p.price;
-      document.getElementById('form-stock').value            = p.stock_quantity || 0;
+      document.getElementById('form-stock').value            = p.stock || 0;
       document.getElementById('form-category').value         = p.category || '';
       setFavForm(p.is_favorite || false);
     } else {
@@ -577,7 +577,7 @@ console.log('BUSINESS ID:', business_id);
     const data  = {
       name:           document.getElementById('form-name').value.trim(),
       price:          parseFloat(document.getElementById('form-price').value) || 0,
-      stock_quantity: parseInt(document.getElementById('form-stock').value) || 0,
+      stock: parseInt(document.getElementById('form-stock').value) || 0,
       category:       document.getElementById('form-category').value.trim() || null,
       is_favorite:    document.getElementById('form-fav').value === 'true',
     };
