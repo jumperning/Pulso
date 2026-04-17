@@ -296,12 +296,14 @@
 
   </div>
 
-  <!-- ===== RECENT ORDERS TABLE ===== -->
+  
+
+  <!-- ===== ÓRDENES RECIENTES CON MODAL DETALLE ===== -->
   <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
     <div class="p-7 pb-4 border-b border-outline-variant/20 flex items-center justify-between">
       <div>
         <h3 class="font-headline font-bold text-lg text-on-surface">Órdenes Recientes</h3>
-        <p class="text-xs text-on-surface-variant mt-0.5">Últimas 20 ventas cerradas</p>
+        <p class="text-xs text-on-surface-variant mt-0.5">Últimas 20 ventas cerradas • Haz clic para ver detalle</p>
       </div>
       <span id="orders-count-badge" class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold hidden"></span>
     </div>
@@ -317,18 +319,73 @@
           </tr>
         </thead>
         <tbody id="recent-orders-tbody" class="divide-y divide-slate-100/80">
-          <tr><td colspan="5" class="px-6 py-12 text-center">
-            <div class="flex flex-col items-center text-outline opacity-50">
-              <span class="material-symbols-outlined text-4xl mb-2">receipt_long</span>
-              <p class="text-sm font-bold">Cargando órdenes...</p>
-            </div>
-          </td></tr>
+          <!-- Se llena con JavaScript -->
         </tbody>
       </table>
     </div>
   </div>
 
+  <!-- ===== MODAL DETALLE DE ORDEN ===== -->
+  <div id="order-detail-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      
+      <!-- Header -->
+      <div class="px-8 py-6 border-b flex items-center justify-between bg-primary text-white rounded-t-3xl">
+        <div>
+          <p class="text-xs opacity-75">ORDEN #<span id="modal-order-id" class="font-mono"></span></p>
+          <h3 id="modal-table-name" class="font-headline font-bold text-2xl"></h3>
+        </div>
+        <button onclick="closeOrderModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-all">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
 
+      <!-- Body -->
+      <div class="flex-1 overflow-y-auto p-8 space-y-6">
+        <!-- Info básica -->
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest">Fecha y Hora</p>
+            <p id="modal-datetime" class="font-semibold text-on-surface"></p>
+          </div>
+          <div>
+            <p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest">Método de Pago</p>
+            <p id="modal-payment" class="font-bold"></p>
+          </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div>
+          <p class="text-on-surface-variant text-xs font-bold uppercase tracking-widest mb-3">Productos vendidos</p>
+          <div id="modal-items-list" class="space-y-3">
+            <!-- Se llena dinámicamente -->
+          </div>
+        </div>
+
+        <!-- Total -->
+        <div class="pt-6 border-t border-dashed border-outline-variant flex justify-between items-end">
+          <span class="text-lg font-headline font-bold text-on-surface">TOTAL</span>
+          <span id="modal-total" class="text-3xl font-headline font-black text-primary"></span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-8 py-5 border-t flex justify-end">
+        <button onclick="closeOrderModal()" 
+          class="px-6 py-3 font-bold text-on-surface-variant hover:bg-surface-container rounded-2xl transition-all">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+  
   <!-- ===== IMPORTAR HISTORIAL ===== -->
   <div class="mt-8 bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
     <div class="p-7 pb-5 border-b border-outline-variant/20 flex items-center justify-between">
@@ -446,7 +503,7 @@
 
 <!-- ===== TOAST ===== -->
 <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
-
+  
 <script>
  const API_URL = 'https://pulsoback.onrender.com';
 
@@ -823,58 +880,65 @@ function timeAgo(dateString) {
   }
 
   // =====================================================================
-  // RECENT ORDERS TABLE
-  // =====================================================================
-  function renderRecentOrders(orders) {
-    const tbody   = document.getElementById('recent-orders-tbody');
-    const badge   = document.getElementById('orders-count-badge');
-
-    if (!orders || orders.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center">
-        <div class="flex flex-col items-center text-outline opacity-50">
-          <span class="material-symbols-outlined text-4xl mb-2">receipt_long</span>
-          <p class="text-sm font-bold">Sin órdenes en este período</p>
-        </div></td></tr>`;
-      return;
-    }
-
-    badge.textContent = `${orders.length} órdenes`;
-    badge.classList.remove('hidden');
-
-    tbody.innerHTML = orders.map(o => {
-      const totalOrder = o.total || o.finalTotal ||0;
-      const date = new Date(o.closed_at);
-      const dateStr = date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
-      const timeStr = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-      const payClass = PAYMENT_CLASS[o.payment_method] || 'pay-cash';
-      const payLabel = PAYMENT_LABELS[o.payment_method] || o.payment_method;
-
-      return `
-        <tr class="hover:bg-surface-container-low/60 transition-colors">
-          <td class="px-6 py-4">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm text-on-surface-variant">table_restaurant</span>
-              <span class="font-headline font-bold text-sm text-on-surface">${o.table_id}</span>
-            </div>
-            <p class="text-xs text-outline font-mono mt-0.5">#${o.id.slice(-8).toUpperCase()}</p>
-          </td>
-          <td class="px-6 py-4">
-            <p class="text-sm font-semibold text-on-surface">${dateStr}</p>
-            <p class="text-xs text-on-surface-variant">${timeStr}</p>
-          </td>
-          <td class="px-6 py-4">
-            <span class="px-3 py-1 rounded-full text-xs font-bold ${payClass}">${payLabel}</span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <span class="text-sm font-semibold text-on-surface-variant">${o.items_count} ítem${o.items_count !== 1 ? 's' : ''}</span>
-          </td>
-          <td class="px-6 py-4 text-right">
-            <span class="font-headline font-black text-sm text-primary">$${o.total.toLocaleString('es-AR')}</span>
-          </td>
-        </tr>`;
-    }).join('');
+// RECENT ORDERS TABLE + MODAL DETALLE (VERSIÓN SEGURA)
+// =====================================================================
+function renderRecentOrders(orders) {
+  const tbody = document.getElementById('recent-orders-tbody');
+  if (!tbody) {
+    console.error("Elemento #recent-orders-tbody no encontrado");
+    return;
   }
 
+  const badge = document.getElementById('orders-count-badge');
+
+  if (!orders || orders.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-outline">
+      <span class="material-symbols-outlined text-4xl mb-2 block">receipt_long</span>
+      Sin órdenes en este período
+    </td></tr>`;
+    if (badge) badge.classList.add('hidden');
+    return;
+  }
+
+  if (badge) {
+    badge.textContent = `${orders.length} órdenes`;
+    badge.classList.remove('hidden');
+  }
+
+  tbody.innerHTML = orders.map(o => {
+    const date = new Date(o.closed_at || o.created_at || Date.now());
+    const dateStr = date.toLocaleDateString('es-AR', { day: '2-digit', month: 'short' });
+    const timeStr = date.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    
+    const payClass = PAYMENT_CLASS[o.payment_method] || 'pay-cash';
+    const payLabel = PAYMENT_LABELS[o.payment_method] || o.payment_method || 'Efectivo';
+
+    return `
+      <tr onclick="showOrderDetail(this, ${JSON.stringify(o).replace(/"/g, '&quot;')})" 
+          class="hover:bg-surface-container-low/70 transition-colors cursor-pointer">
+        <td class="px-6 py-5">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm text-on-surface-variant">table_restaurant</span>
+            <span class="font-headline font-bold text-on-surface">${o.table_id || 'Sin mesa'}</span>
+          </div>
+          <p class="text-xs text-outline font-mono">#${(o.id || '').slice(-8).toUpperCase() || 'N/A'}</p>
+        </td>
+        <td class="px-6 py-5">
+          <p class="text-sm font-semibold">${dateStr}</p>
+          <p class="text-xs text-on-surface-variant">${timeStr}</p>
+        </td>
+        <td class="px-6 py-5">
+          <span class="px-3 py-1 rounded-full text-xs font-bold ${payClass}">${payLabel}</span>
+        </td>
+        <td class="px-6 py-5 text-right text-sm font-semibold text-on-surface-variant">
+          ${o.items_count || (o.order_items ? o.order_items.length : 0) || 0} ítems
+        </td>
+        <td class="px-6 py-5 text-right">
+          <span class="font-headline font-black text-primary">$${Number(o.total || 0).toLocaleString('es-AR')}</span>
+        </td>
+      </tr>`;
+  }).join('');
+}
   // =====================================================================
   // EMPTY STATE
   // =====================================================================
@@ -1438,9 +1502,81 @@ function timeAgo(dateString) {
 
     window._importRows = null;
   }
+// ==================== MODAL DETALLE DE ORDEN (VERSIÓN MEJORADA) ====================
+window.showOrderDetail = function(rowElement, order) {
+  if (event) event.stopImmediatePropagation();
 
+  // Datos básicos
+  document.getElementById('modal-order-id').textContent = (order.id || 'N/A').slice(-8).toUpperCase();
+  document.getElementById('modal-table-name').textContent = order.table_id || 'Sin mesa';
+
+  const date = new Date(order.closed_at || order.created_at || Date.now());
+  document.getElementById('modal-datetime').textContent = 
+    date.toLocaleString('es-AR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+  const payLabel = PAYMENT_LABELS[order.payment_method] || order.payment_method || 'Efectivo';
+  document.getElementById('modal-payment').innerHTML = 
+    `<span class="px-4 py-1 rounded-full text-sm font-bold ${PAYMENT_CLASS[order.payment_method] || 'pay-cash'}">${payLabel}</span>`;
+
+  document.getElementById('modal-total').textContent = 
+    `$${Number(order.total || 0).toLocaleString('es-AR')}`;
+
+  // === LISTA DE PRODUCTOS ===
+  const itemsContainer = document.getElementById('modal-items-list');
+  let items = [];
+
+  // Caso 1: Viene desde analytics (order_items ya embebido)
+  if (order.order_items && Array.isArray(order.order_items)) {
+    items = order.order_items;
+  }
+  // Caso 2: Viene desde otras partes (order_items dentro de un objeto)
+  else if (order.order_items?.order_items) {
+    items = order.order_items.order_items;
+  }
+
+  if (items.length === 0) {
+    itemsContainer.innerHTML = `
+      <p class="text-sm text-outline italic py-6 text-center">
+        No hay detalle de productos disponible para esta orden.<br>
+        <span class="text-xs">(Posiblemente sea una orden antigua sin items embebidos)</span>
+      </p>`;
+  } else {
+    itemsContainer.innerHTML = items.map(item => {
+      const prod = item.products || {};
+      const quantity = item.quantity || 1;
+      const price = Number(prod.price || 0);
+      const subtotal = price * quantity;
+
+      return `
+        <div class="flex justify-between items-start py-3 border-b last:border-0">
+          <div class="flex-1 pr-4">
+            <p class="font-medium text-on-surface">${prod.name || 'Producto sin nombre'}</p>
+            ${prod.category ? `<p class="text-xs text-on-surface-variant">${prod.category}</p>` : ''}
+          </div>
+          <div class="text-right whitespace-nowrap">
+            <p class="text-sm">${quantity} × $${price.toLocaleString('es-AR')}</p>
+            <p class="font-bold text-primary">$${subtotal.toLocaleString('es-AR')}</p>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('order-detail-modal').classList.remove('hidden');
+};
+
+window.closeOrderModal = function() {
+  document.getElementById('order-detail-modal').classList.add('hidden');
+};
   loadData();
   setInterval(loadData, 120_000);
+  
 </script>
 </body>
 </html>
