@@ -370,11 +370,23 @@
       </div>
 
       <!-- Footer -->
-      <div class="px-8 py-5 border-t flex justify-end">
-        <button onclick="closeOrderModal()" 
-          class="px-6 py-3 font-bold text-on-surface-variant hover:bg-surface-container rounded-2xl transition-all">
-          Cerrar
+      <div class="px-8 py-5 border-t flex justify-between items-center">
+        <button id="btn-reopen-order" onclick="reopenOrder()"
+          class="hidden flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all active:scale-95">
+          <span class="material-symbols-outlined text-sm">lock_open</span>
+          Reabrir mesa
         </button>
+        <div class="flex items-center gap-2">
+          <button onclick="printOrder()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-surface-container text-on-surface font-bold text-sm hover:bg-surface-container-high transition-all active:scale-95">
+            <span class="material-symbols-outlined text-sm">print</span>
+            Imprimir
+          </button>
+          <button onclick="closeOrderModal()"
+            class="px-6 py-2.5 font-bold text-on-surface-variant hover:bg-surface-container rounded-2xl transition-all">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1503,8 +1515,17 @@ function renderRecentOrders(orders) {
     window._importRows = null;
   }
 // ==================== MODAL DETALLE DE ORDEN (VERSIÓN MEJORADA) ====================
+let _currentOrderId = null;
+
 window.showOrderDetail = function(rowElement, order) {
   if (event) event.stopImmediatePropagation();
+
+  _currentOrderId = order.id;
+  const btnReopen = document.getElementById('btn-reopen-order');
+  if (btnReopen) {
+    if (order.id) btnReopen.classList.remove('hidden');
+    else btnReopen.classList.add('hidden');
+  }
 
   // Datos básicos
   document.getElementById('modal-order-id').textContent = (order.id || 'N/A').slice(-8).toUpperCase();
@@ -1569,6 +1590,116 @@ window.showOrderDetail = function(rowElement, order) {
   }
 
   document.getElementById('order-detail-modal').classList.remove('hidden');
+};
+
+window.printOrder = function() {
+  const id       = document.getElementById('modal-order-id').textContent;
+  const mesa     = document.getElementById('modal-table-name').textContent;
+  const fecha    = document.getElementById('modal-datetime').textContent;
+  const total    = document.getElementById('modal-total').textContent;
+  const payment  = document.getElementById('modal-payment').textContent.trim();
+
+  // Recolectar items del modal
+  const itemEls  = document.querySelectorAll('#modal-items-list [data-print-row]');
+  let itemsHTML  = '';
+  itemEls.forEach(el => { itemsHTML += el.outerHTML; });
+
+  // Si no hay data-print-row, tomar el texto de cada fila
+  if (!itemsHTML) {
+    document.querySelectorAll('#modal-items-list .flex.justify-between').forEach(row => {
+      const name    = row.querySelector('.font-semibold, .font-medium')?.textContent?.trim() || '';
+      const details = row.querySelector('.text-xs')?.textContent?.trim() || '';
+      const subtotal = row.querySelector('.font-black, .font-bold.text-primary')?.textContent?.trim() || '';
+      if (name) {
+        itemsHTML += `
+          <tr>
+            <td style="padding:6px 0;border-bottom:1px solid #eee">${name}<br><small style="color:#888">${details}</small></td>
+            <td style="padding:6px 0;border-bottom:1px solid #eee;text-align:right;font-weight:bold">${subtotal}</td>
+          </tr>`;
+      }
+    });
+  }
+
+  const win = window.open('', '_blank', 'width=420,height=700');
+  if (!win) { showToast('Permitir popups para imprimir'); return; }
+
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"/>
+<title>Orden #${id}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Courier New', monospace; font-size: 13px; padding: 24px; color: #111; }
+  .logo { font-size: 22px; font-weight: 900; letter-spacing: -1px; margin-bottom: 4px; }
+  .divider { border: none; border-top: 1px dashed #ccc; margin: 12px 0; }
+  .divider-solid { border: none; border-top: 2px solid #111; margin: 12px 0; }
+  .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .label { color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+  .value { font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  .total-row { font-size: 18px; font-weight: 900; }
+  .footer { text-align: center; font-size: 11px; color: #888; margin-top: 20px; }
+  @media print {
+    body { padding: 8px; }
+    button { display: none; }
+  }
+</style>
+</head><body>
+
+<div class="logo">OnceyDoce</div>
+<p class="label">Comprobante de venta</p>
+<hr class="divider-solid"/>
+
+<div class="row"><span class="label">Orden</span><span class="value">#${id}</span></div>
+<div class="row"><span class="label">Mesa</span><span class="value">${mesa}</span></div>
+<div class="row"><span class="label">Fecha</span><span class="value">${fecha}</span></div>
+<div class="row"><span class="label">Pago</span><span class="value">${payment}</span></div>
+
+<hr class="divider"/>
+<p class="label" style="margin-bottom:8px">Detalle</p>
+<table>${itemsHTML || '<tr><td style="color:#888;padding:8px 0">Sin detalle disponible</td></tr>'}</table>
+
+<hr class="divider-solid"/>
+<div class="row total-row">
+  <span>TOTAL</span>
+  <span>${total}</span>
+</div>
+
+<div class="footer">
+  <p>Gracias por su visita</p>
+  <p style="margin-top:4px">OnceyDoce POS</p>
+</div>
+
+<script>window.onload = () => window.print();<\/script>
+</body></html>`);
+  win.document.close();
+};
+
+window.reopenOrder = async function() {
+  if (!_currentOrderId) return;
+
+  const btn = document.getElementById('btn-reopen-order');
+  const origHTML = btn.innerHTML;
+  btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">autorenew</span> Reabriendo…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_URL}/orders/${_currentOrderId}/reopen`, {
+      method: 'PATCH',
+      headers: HEADERS,
+    });
+
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+
+    showToast('✅ Mesa reabierta correctamente');
+    closeOrderModal();
+    loadData(); // refrescar la tabla
+  } catch (e) {
+    console.error('Error al reabrir:', e);
+    showToast('❌ No se pudo reabrir la mesa');
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+  }
 };
 
 window.closeOrderModal = function() {
