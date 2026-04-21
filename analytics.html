@@ -300,13 +300,21 @@
 
   <!-- ===== ÓRDENES RECIENTES CON MODAL DETALLE ===== -->
   <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
-    <div class="p-7 pb-4 border-b border-outline-variant/20 flex items-center justify-between">
-      <div>
-        <h3 class="font-headline font-bold text-lg text-on-surface">Órdenes Recientes</h3>
-        <p class="text-xs text-on-surface-variant mt-0.5">Últimas 20 ventas cerradas • Haz clic para ver detalle</p>
-      </div>
-      <span id="orders-count-badge" class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold hidden"></span>
+ <div class="p-7 pb-4 border-b border-outline-variant/20 flex items-center justify-between">
+  <div>
+    <h3 class="font-headline font-bold text-lg text-on-surface">Órdenes Recientes</h3>
+    <p class="text-xs text-on-surface-variant mt-0.5">Últimas ventas cerradas • Haz clic para ver detalle</p>
+  </div>
+  <div class="flex items-center gap-3">
+    <div class="flex items-center bg-surface-container p-1 rounded-full gap-0.5">
+      <button onclick="setOrdersGranularity('today')" id="og-today" class="orders-gran-btn px-3 py-1 rounded-full text-xs font-headline font-semibold text-on-surface-variant transition-all">Hoy</button>
+      <button onclick="setOrdersGranularity('week')"  id="og-week"  class="orders-gran-btn px-3 py-1 rounded-full text-xs font-headline font-semibold text-on-surface-variant transition-all">Semana</button>
+      <button onclick="setOrdersGranularity('month')" id="og-month" class="orders-gran-btn active px-3 py-1 rounded-full text-xs font-headline font-semibold text-on-surface-variant transition-all">Mes</button>
+      <button onclick="setOrdersGranularity('year')"  id="og-year"  class="orders-gran-btn px-3 py-1 rounded-full text-xs font-headline font-semibold text-on-surface-variant transition-all">Año</button>
     </div>
+    <span id="orders-count-badge" class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold hidden"></span>
+  </div>
+</div>
     <div class="overflow-x-auto">
       <table class="w-full text-left">
         <thead class="bg-surface-container-low">
@@ -625,6 +633,58 @@ function timeAgo(dateString) {
   // =====================================================================
   // LOAD DATA
   // =====================================================================
+
+
+// ── GRANULARIDAD GRÁFICO ─────────────────────────────────────────────
+let currentChartGranularity = 'month';
+const CHART_SUBS = {
+  day:   'Últimos 7 días — órdenes cerradas',
+  week:  'Últimas 6 semanas — órdenes cerradas',
+  month: 'Últimos 6 meses — órdenes cerradas',
+};
+
+async function setChartGranularity(g) {
+  currentChartGranularity = g;
+  document.querySelectorAll('.chart-gran-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`cg-${g}`)?.classList.add('active');
+  document.getElementById('monthly-chart-sub').textContent = CHART_SUBS[g] || '';
+
+  document.getElementById('chart-skeleton').style.display = 'flex';
+  try {
+    const months = g === 'day' ? 0 : g === 'week' ? 6 : 6;
+    const res  = await fetch(`${API_URL}/orders/analytics?period=${currentPeriod}&granularity=${g}&months=${months}`, { headers: HEADERS });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderMonthlyChart(data.monthly_chart);
+  } catch {
+    showToast('warn', 'No se pudo actualizar el gráfico');
+    document.getElementById('chart-skeleton').style.display = 'none';
+  }
+}
+
+// ── GRANULARIDAD ÓRDENES ─────────────────────────────────────────────
+let currentOrdersGranularity = 'month';
+
+async function setOrdersGranularity(g) {
+  currentOrdersGranularity = g;
+  document.querySelectorAll('.orders-gran-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`og-${g}`)?.classList.add('active');
+
+  const tbody = document.getElementById('recent-orders-tbody');
+  tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-outline text-sm">Cargando...</td></tr>`;
+
+  try {
+    const res  = await fetch(`${API_URL}/orders/analytics?period=${g}&granularity=${g}`, { headers: HEADERS });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderRecentOrders(data.recent_orders);
+  } catch {
+    showToast('warn', 'No se pudo actualizar las órdenes');
+    tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-outline text-sm">Error al cargar</td></tr>`;
+  }
+}
+
+  
   async function loadData() {
 
     loadLiveStatus();
