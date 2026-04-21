@@ -622,14 +622,19 @@ function timeAgo(dateString) {
   // =====================================================================
   // PERIOD
   // =====================================================================
-  function setPeriod(p) {
-    currentPeriod = p;
-    ['today','week','month','year'].forEach(id => {
-      document.getElementById(`p-${id}`).classList.toggle('active', id === p);
-    });
-    loadData();
-  }
+function setPeriod(p) {
+  currentPeriod = p;
+  ['today','week','month','year'].forEach(id => {
+    document.getElementById(`p-${id}`).classList.toggle('active', id === p);
+  });
 
+  // Sincronizar filtro de órdenes con el período global
+  currentOrdersGranularity = p;
+  document.querySelectorAll('.orders-gran-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`og-${p}`)?.classList.add('active');
+
+  loadData();
+}
   // =====================================================================
   // LOAD DATA
   // =====================================================================
@@ -661,12 +666,13 @@ async function setChartGranularity(g) {
     document.getElementById('chart-skeleton').style.display = 'none';
   }
 }
-
 // ── GRANULARIDAD ÓRDENES ─────────────────────────────────────────────
 let currentOrdersGranularity = 'month';
 
 async function setOrdersGranularity(g) {
   currentOrdersGranularity = g;
+
+  // Sincronizar estilos del botón activo
   document.querySelectorAll('.orders-gran-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(`og-${g}`)?.classList.add('active');
 
@@ -674,7 +680,8 @@ async function setOrdersGranularity(g) {
   tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-outline text-sm">Cargando...</td></tr>`;
 
   try {
-    const res  = await fetch(`${API_URL}/orders/analytics?period=${g}&granularity=${g}`, { headers: HEADERS });
+    // Usamos el período de órdenes independiente del período global del topbar
+    const res = await fetch(`${API_URL}/orders/analytics?period=${g}&months=6`, { headers: HEADERS });
     if (!res.ok) throw new Error();
     const data = await res.json();
     renderRecentOrders(data.recent_orders);
@@ -717,19 +724,23 @@ async function setOrdersGranularity(g) {
   // =====================================================================
   // RENDER ALL
   // =====================================================================
-  function renderAll(data) {
-    renderKPIs(data.kpis);
-    renderMonthlyChart(data.monthly_chart);
-    renderPaymentChart(data.kpis.payment_breakdown);
-    renderCategoryBars(data.category_sales);
-    renderTopProducts(data.top_products);
-    renderRecentOrders(data.recent_orders);
+function renderAll(data) {
+  renderKPIs(data.kpis);
+  renderMonthlyChart(data.monthly_chart);
+  renderPaymentChart(data.kpis.payment_breakdown);
+  renderCategoryBars(data.category_sales);
+  renderTopProducts(data.top_products);
 
-    // Period subtitle
-    const labels = { today: 'Hoy', week: 'Esta semana', month: 'Este mes', year: 'Este año' };
-    document.getElementById('period-subtitle').textContent =
-      `${labels[currentPeriod]} — ${data.recent_orders?.length || 0} órdenes cerradas`;
+  // Solo renderiza las órdenes desde loadData si el filtro de órdenes
+  // coincide con el período global — si no, no las pisa
+  if (currentOrdersGranularity === currentPeriod) {
+    renderRecentOrders(data.recent_orders);
   }
+
+  const labels = { today: 'Hoy', week: 'Esta semana', month: 'Este mes', year: 'Este año' };
+  document.getElementById('period-subtitle').textContent =
+    `${labels[currentPeriod]} — ${data.recent_orders?.length || 0} órdenes cerradas`;
+}
 
   // =====================================================================
   // KPIs
