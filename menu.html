@@ -505,16 +505,26 @@ async function init() {
   updateAuthUI();
 
   try {
-    // Load products
+    // Fetch all columns — handles any schema variation gracefully
     const { data: products, error } = await sb
       .from('products')
-      .select('id, name, description, price, category, image_url, is_favorite, stock_quantity, sku')
+      .select('*')
       .eq('business_id', BUSINESS_ID)
-      .order('is_favorite', { ascending: false })
       .order('name', { ascending: true });
 
     if (error) throw error;
-    allProducts = products || [];
+
+    // Normalize fields: handle both stock and stock_quantity column names
+    allProducts = (products || []).map(p => ({
+      ...p,
+      description:    p.description    ?? p.descripcion    ?? '',
+      image_url:      p.image_url      ?? p.imagen_url     ?? null,
+      is_favorite:    p.is_favorite    ?? p.favorito       ?? false,
+      stock:          p.stock          ?? p.stock_quantity ?? 0,
+    }));
+
+    // Sort: favorites first
+    allProducts.sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0) || a.name.localeCompare(b.name));
 
     // Extract unique categories
     categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))].sort();
@@ -548,12 +558,15 @@ async function init() {
 // ── HERO ──────────────────────────────────────────────────────────────────────
 async function loadHero() {
   try {
-    const { data: banners } = await sb
+    const { data: banners, error } = await sb
       .from('banners')
       .select('*')
       .eq('business_id', BUSINESS_ID)
       .eq('active', true)
       .order('display_order', { ascending: true });
+
+    // If table doesn't exist yet, just show fallback
+    if (error) throw new Error('banners_unavailable');
 
     const hero     = document.getElementById('hero-section');
     const skeleton = document.getElementById('hero-skeleton');
@@ -1291,8 +1304,7 @@ document.getElementById('search-input')?.addEventListener('input', function() {
   const results = allProducts.filter(p =>
     p.name.toLowerCase().includes(q) ||
     (p.description||'').toLowerCase().includes(q) ||
-    (p.category||'').toLowerCase().includes(q) ||
-    (p.sku||'').toLowerCase().includes(q)
+    (p.category||'').toLowerCase().includes(q)
   );
 
   if (!results.length) {
