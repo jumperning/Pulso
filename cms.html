@@ -93,69 +93,76 @@ tailwind.config = {
 <!-- ══════════════════════════════════════════════════
      SIDEBAR
 ══════════════════════════════════════════════════ -->
-<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest border-r border-outline-variant/20 flex flex-col z-50 shadow-sm">
+<aside id="shared-sidebar" style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#fff;border-right:1px solid rgba(197,197,212,.3);display:flex;flex-direction:column;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.05);font-family:'Inter',sans-serif">
   <!-- Logo -->
-  <div class="px-6 py-5 border-b border-outline-variant/15">
-    <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-white text-lg" style="font-variation-settings:'FILL' 1;">storefront</span>
-      </div>
-      <div>
-        <p class="font-headline font-black text-sm text-on-surface leading-none">OnceyDoce</p>
-        <p class="text-[10px] text-outline mt-0.5">Admin Menú Público</p>
-      </div>
+  <div style="padding:1.1rem 1.4rem;border-bottom:1px solid rgba(197,197,212,.2);display:flex;align-items:center;gap:.7rem">
+    <div style="width:2.1rem;height:2.1rem;background:#2b3896;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <span class="material-symbols-outlined" style="color:#fff;font-size:1rem;font-variation-settings:'FILL' 1">storefront</span>
+    </div>
+    <div>
+      <p style="font-family:Manrope,sans-serif;font-weight:900;font-size:.82rem;color:#111d23;line-height:1">OnceyDoce</p>
+      <p style="font-size:.58rem;color:#757684;margin-top:.15rem">Panel de control</p>
     </div>
   </div>
 
   <!-- Nav -->
-  <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
-    <p class="px-4 py-2 text-[9px] font-black text-outline uppercase tracking-widest">Menú</p>
+  <nav style="flex:1;padding:.6rem;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem" class="no-scrollbar">
+    <!-- Terminal section -->
+    <p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">Terminal</p>
+    <a href="terminal.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">point_of_sale</span>Terminal
+    </a>
+    <a href="index.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">receipt_long</span>Órdenes activas
+    </a>
+    <a href="list-prod.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">inventory_2</span>Inventario
+    </a>
+    <a href="analytics.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">bar_chart</span>Analytics
+    </a>
+
+    <!-- Menú Público section — items are internal nav calls -->
+    <p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">Menú Público</p>
     <div class="nav-item active" onclick="goTo('banners')">
-      <span class="material-symbols-outlined text-xl">image</span>
-      Banners
+      <span class="material-symbols-outlined text-xl">image</span>Banners
     </div>
     <div class="nav-item" onclick="goTo('categories')">
-      <span class="material-symbols-outlined text-xl">category</span>
-      Categorías
+      <span class="material-symbols-outlined text-xl">category</span>Categorías
     </div>
     <div class="nav-item" onclick="goTo('texts')">
-      <span class="material-symbols-outlined text-xl">edit_note</span>
-      Textos y Marca
+      <span class="material-symbols-outlined text-xl">edit_note</span>Textos y Marca
     </div>
     <div class="nav-item" onclick="goTo('cart-settings')">
-      <span class="material-symbols-outlined text-xl">shopping_cart</span>
-      Carrito / Pedidos
+      <span class="material-symbols-outlined text-xl">shopping_cart</span>Carrito / Pedidos
     </div>
 
-    <p class="px-4 py-2 mt-3 text-[9px] font-black text-outline uppercase tracking-widest">Clientes</p>
+    <!-- Clientes section -->
+    <p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">Clientes</p>
     <div class="nav-item" onclick="goTo('customers')">
-      <span class="material-symbols-outlined text-xl">group</span>
-      Usuarios
+      <span class="material-symbols-outlined text-xl">group</span>Usuarios
       <span id="badge-customers" class="ml-auto bg-primary text-white text-[10px] font-black px-2 py-0.5 rounded-full hidden"></span>
     </div>
     <div class="nav-item" onclick="goTo('newsletter')">
-      <span class="material-symbols-outlined text-xl">mail</span>
-      Newsletter
+      <span class="material-symbols-outlined text-xl">mail</span>Newsletter
     </div>
 
-    <p class="px-4 py-2 mt-3 text-[9px] font-black text-outline uppercase tracking-widest">Sistema</p>
-    <div class="nav-item" onclick="goTo('products')">
-      <span class="material-symbols-outlined text-xl">inventory_2</span>
-      <a href="list-prod.html" class="w-full">Inventario</a>
-    </div>
+    <!-- Sistema -->
+    <p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">Sistema</p>
+    <a href="import-products.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">upload_file</span>Importar
+    </a>
+    <a href="setup.html" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:600;text-decoration:none;color:#454652;transition:all .15s" onmouseover="this.style.background='#e9f6fd'" onmouseout="this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem">settings</span>Configuración
+    </a>
   </nav>
 
-  <!-- Bottom user pill -->
-  <div class="px-4 py-4 border-t border-outline-variant/15">
-    <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container">
-      <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings:'FILL' 1;">person</span>
-      </div>
-      <div class="flex-1 min-w-0">
-        <p id="sidebar-user" class="text-xs font-bold text-on-surface truncate">Admin</p>
-        <p class="text-[10px] text-outline">Panel de control</p>
-      </div>
-    </div>
+  <!-- Ver menú -->
+  <div style="padding:.9rem;border-top:1px solid rgba(197,197,212,.2)">
+    <a href="menu.html" target="_blank" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border-radius:.65rem;background:#e9f6fd;text-decoration:none">
+      <span class="material-symbols-outlined" style="font-size:.9rem;color:#2b3896">open_in_new</span>
+      <span style="font-size:.68rem;font-weight:700;color:#2b3896;font-family:Manrope,sans-serif">Ver menú público</span>
+    </a>
   </div>
 </aside>
 
