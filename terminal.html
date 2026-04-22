@@ -7,6 +7,7 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script id="tailwind-config">
   tailwind.config = {
     theme: {
@@ -17,6 +18,7 @@
           "secondary": "#4858ab", "secondary-container": "#96a5ff",
           "on-secondary-container": "#27378a",
           "tertiary": "#004c44", "on-tertiary": "#ffffff",
+          "tertiary-container": "#00665b", "on-tertiary-container": "#7ce4d3",
           "error": "#ba1a1a", "error-container": "#ffdad6", "on-error-container": "#93000a",
           "surface": "#f4faff", "surface-dim": "#cfdce4",
           "surface-container-lowest": "#ffffff", "surface-container-low": "#e9f6fd",
@@ -51,79 +53,35 @@
   .quick-btn:hover { transform: translateY(-2px); border-color: rgb(43 56 150 / 0.3); }
   .quick-btn:active { transform: scale(0.95); }
   .quick-btn.active-table { background: rgb(43 56 150 / 0.12); border-color: rgb(43 56 150 / 0.4); color: #2b3896; }
-
-  /* Alerta 15 min */
   @keyframes alertPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(186,26,26,0.4); } 50% { box-shadow: 0 0 0 10px rgba(186,26,26,0); } }
   #alert-15min { animation: alertPulse 1.5s infinite; }
+
+  /* Points modal */
+  .pts-tier { padding: 2px 10px; border-radius: 9999px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+  .pts-tier-bronze { background:#cd7f32; color:#fff; }
+  .pts-tier-silver { background:#8e9bb5; color:#fff; }
+  .pts-tier-gold   { background:#d4af37; color:#fff; }
+  .pts-tier-cult   { background:linear-gradient(135deg,#2b3896,#a855f7); color:#fff; }
+
+  /* Sidebar shared */
+  #shared-sidebar { font-family: 'Inter', sans-serif; }
 </style>
 </head>
 <body class="bg-surface-dim text-on-surface antialiased overflow-hidden">
 
-<!-- ===== SIDEBAR ===== -->
-<aside class="h-screen w-64 fixed left-0 top-0 bg-slate-100 flex flex-col py-6 z-50">
-  <div class="px-6 mb-8 flex items-center gap-3">
-    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-      <span class="material-symbols-outlined text-white">restaurant</span>
-    </div>
-    <div>
-      <h1 class="font-headline font-black text-xl text-indigo-700">OnceyDoce</h1>
-      <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Bar & Café</p>
-    </div>
-  </div>
-  <nav class="flex-1 space-y-1 px-2">
-    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="index.html">
-      <span class="material-symbols-outlined">deck</span>
-      <span class="font-headline">Mesas</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 bg-white text-indigo-700 rounded-full font-bold shadow-sm" href="terminal">
-      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">point_of_sale</span>
-      <span class="font-headline">Terminal</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="analytics">
-      <span class="material-symbols-outlined">analytics</span>
-      <span class="font-headline">Reportes</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white/60 rounded-full font-medium transition-colors" href="list-prod">
-      <span class="material-symbols-outlined">inventory_2</span>
-      <span class="font-headline">Inventario</span>
-    </a>
-  </nav>
-  <div class="px-4 mt-4 relative">
-    <button id="user-menu-btn" onclick="toggleUserMenu()"
-      class="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-white/60 transition-colors cursor-pointer">
-      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold" id="sidebar-initial">U</div>
-      <div class="flex-1 text-left">
-        <p class="text-xs font-bold text-slate-700 truncate" id="sidebar-name">Usuario</p>
-        <p class="text-[10px] text-slate-400">Ver opciones</p>
-      </div>
-      <span class="material-symbols-outlined text-slate-400 text-sm">expand_more</span>
-    </button>
-    <div id="user-menu-dropdown"
-      class="hidden absolute bottom-14 left-4 right-4 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-[60]">
-      <div class="px-4 py-3 border-b border-slate-100">
-        <p class="text-xs font-bold text-slate-700 truncate" id="dropdown-name">Usuario</p>
-        <p class="text-[10px] text-slate-400 truncate" id="dropdown-email"></p>
-      </div>
-      <button onclick="doLogout()"
-        class="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-colors text-sm font-bold">
-        <span class="material-symbols-outlined text-sm">logout</span>
-        Cerrar sesión
-      </button>
-    </div>
-  </div>
-</aside>
+<!-- SIDEBAR — injected by initSidebar() below -->
 
-<!-- ===== MAIN LAYOUT ===== -->
+<!-- ══════════════ MAIN LAYOUT ══════════════ -->
 <div class="pl-64 h-screen flex overflow-hidden">
 
-  <!-- ===== PRODUCTS COLUMN ===== -->
+  <!-- ══ PRODUCTS COLUMN ══ -->
   <section class="flex-1 bg-surface-container-lowest overflow-y-auto px-8 py-6 rounded-tl-[3rem] shadow-inner z-0">
     <div class="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-md pt-2 pb-4 z-10 mb-6">
       <div class="flex items-center gap-4 mb-5">
         <div class="relative flex-1 max-w-2xl">
           <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
-          <input id="search-input" oninput="filterProducts()" type="text" placeholder="Buscar producto o SKU..."
-            class="w-full bg-surface-container-high border-none rounded-full py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none shadow-sm" />
+          <input id="search-input" oninput="filterProducts()" type="text" placeholder="Buscar producto..."
+            class="w-full bg-surface-container-high border-none rounded-full py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary focus:bg-white transition-all outline-none shadow-sm"/>
         </div>
         <button onclick="openTableModal()" class="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2.5 rounded-full transition-colors">
           <span class="material-symbols-outlined text-sm">table_restaurant</span>
@@ -148,7 +106,7 @@
     </div>
   </section>
 
-  <!-- ===== CART COLUMN ===== -->
+  <!-- ══ CART COLUMN ══ -->
   <aside class="w-96 bg-surface-container-lowest flex flex-col shadow-2xl z-20 border-l border-outline-variant/10">
     <div class="px-6 py-5 border-b border-outline-variant/10 flex-shrink-0">
       <div class="flex items-center justify-between mb-3">
@@ -160,14 +118,13 @@
       <div class="flex gap-2 flex-wrap items-center">
         <span id="display-table" onclick="openTableModal()" class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider cursor-pointer hover:bg-primary/20 transition-colors">Sin Mesa</span>
         <span id="order-id" class="bg-surface-container text-outline px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">#NUEVA</span>
-        <!-- Badge de estado -->
         <span id="order-status-badge" class="hidden px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
       </div>
     </div>
 
     <div id="cart-items" class="flex-1 overflow-y-auto px-6 py-4 space-y-4 no-scrollbar"></div>
 
-    <!-- ===== CART FOOTER CON ESTADOS ===== -->
+    <!-- Cart Footer -->
     <div class="p-6 bg-surface-container-low border-t border-outline-variant/10 rounded-tl-3xl flex-shrink-0">
       <div class="space-y-3 mb-5">
         <div class="flex justify-between text-on-surface-variant">
@@ -180,7 +137,7 @@
         </div>
       </div>
 
-      <!-- ESTADO: sin orden / nueva → "Confirmar Pedido" -->
+      <!-- Estado: nueva orden -->
       <div id="btn-section-new">
         <div class="mb-3">
           <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2 px-1">Método de Pago</label>
@@ -193,32 +150,37 @@
             <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-outline">expand_more</span>
           </div>
         </div>
-        <button onclick="confirmOrder()"
+        <!-- ★ BOTÓN COBRAR CON PUNTOS -->
+        <button onclick="openPointsModal()"
           class="w-full bg-primary text-on-primary py-4 rounded-full font-headline font-black text-base shadow-xl shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-3 mb-3">
-          <span class="material-symbols-outlined">send</span>
-          Confirmar Pedido
+          <span class="material-symbols-outlined">payments</span>
+          Cobrar y cargar puntos
+        </button>
+        <button onclick="confirmOrder()"
+          class="w-full border-2 border-outline-variant/40 text-on-surface-variant py-3 rounded-full font-headline font-bold text-sm hover:bg-surface-container transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-sm">send</span>
+          Confirmar sin cobrar
         </button>
       </div>
 
-      <!-- ESTADO: pending → "Marcar como entregado" -->
+      <!-- Estado: pending -->
       <div id="btn-section-pending" class="hidden mb-3">
         <button onclick="markCurrentOrderDelivered()"
           class="w-full bg-tertiary text-on-tertiary py-4 rounded-full font-headline font-black text-base shadow-lg hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-3">
           <span class="material-symbols-outlined">check_circle</span>
-          Pedido entregado al cliente
+          Pedido entregado
         </button>
       </div>
 
-      <!-- ESTADO: open → "Cerrar Mesa / Cobrar" -->
+      <!-- Estado: open → cobrar -->
       <div id="btn-section-open" class="hidden mb-3">
-        <button onclick="closeCurrentOrder()"
+        <button onclick="openPointsModal()"
           class="w-full bg-error text-white py-4 rounded-full font-headline font-black text-base shadow-lg hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-3">
           <span class="material-symbols-outlined">payments</span>
           Cerrar Mesa / Cobrar
         </button>
       </div>
 
-      <!-- Imprimir comanda: visible en pending y open -->
       <button id="btn-print-comanda" onclick="printComanda()"
         class="hidden w-full bg-secondary-container text-on-secondary-container py-3 rounded-full font-headline font-bold text-sm hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2">
         <span class="material-symbols-outlined text-sm">receipt_long</span>
@@ -228,30 +190,159 @@
   </aside>
 </div>
 
-<!-- ===== ALERTA 15 MIN ===== -->
-<div id="alert-15min"
-  class="hidden fixed top-6 right-6 z-[300] bg-error text-white px-5 py-4 rounded-2xl shadow-2xl max-w-xs fade-up">
+<!-- ══════════════ MODAL: PUNTOS AL COBRAR ══════════════ -->
+<div id="modal-points" class="hidden fixed inset-0 bg-on-surface/50 backdrop-blur-sm z-[120] flex items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-3xl w-full max-w-md shadow-2xl fade-up overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-8 pt-7 pb-5 border-b border-outline-variant/15">
+      <div class="flex items-center justify-between">
+        <h2 class="font-headline font-black text-xl text-on-surface">Cobro y Puntos</h2>
+        <button onclick="closePointsModal()" class="p-2 text-outline hover:bg-surface-container rounded-full transition-all">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <p class="text-sm text-on-surface-variant mt-1">Buscá al cliente para sumarle puntos o cobrá sin asociar.</p>
+    </div>
+
+    <div class="px-8 py-6 space-y-5">
+
+      <!-- Total del pedido -->
+      <div class="flex items-center justify-between bg-surface-container rounded-2xl px-5 py-4">
+        <span class="text-sm font-bold text-on-surface-variant uppercase tracking-widest">Total a cobrar</span>
+        <span id="pts-modal-total" class="font-headline font-black text-2xl text-primary">$0</span>
+      </div>
+
+      <!-- Buscador de cliente -->
+      <div>
+        <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Buscar cliente (nombre o email)</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+          <input id="pts-search" type="text" placeholder="Juan García o juan@..." oninput="searchCustomer()"
+            class="w-full bg-surface-container border-none rounded-full py-3 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary outline-none"/>
+        </div>
+        <!-- Resultados -->
+        <div id="pts-results" class="mt-2 space-y-1 max-h-36 overflow-y-auto hidden"></div>
+      </div>
+
+      <!-- Cliente seleccionado -->
+      <div id="pts-selected-customer" class="hidden bg-primary/5 border border-primary/20 rounded-2xl px-5 py-4">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <div id="pts-avatar" class="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center font-headline font-black text-primary text-lg">?</div>
+            <div>
+              <p id="pts-name" class="font-headline font-bold text-sm text-on-surface"></p>
+              <p id="pts-email" class="text-xs text-outline"></p>
+            </div>
+          </div>
+          <button onclick="clearSelectedCustomer()" class="text-outline hover:text-error transition-colors">
+            <span class="material-symbols-outlined text-sm">close</span>
+          </button>
+        </div>
+        <!-- Puntos actuales + a ganar -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-surface-container-lowest rounded-xl px-4 py-3 text-center">
+            <p class="text-[10px] text-outline uppercase tracking-widest font-bold mb-1">Puntos actuales</p>
+            <p id="pts-current" class="font-headline font-black text-xl text-on-surface">0</p>
+          </div>
+          <div class="bg-surface-container-lowest rounded-xl px-4 py-3 text-center border-2 border-primary/30">
+            <p class="text-[10px] text-outline uppercase tracking-widest font-bold mb-1">Puntos a sumar</p>
+            <p id="pts-to-earn" class="font-headline font-black text-xl text-primary">0</p>
+          </div>
+        </div>
+        <!-- Nivel -->
+        <div class="mt-3 flex items-center justify-between">
+          <span id="pts-tier-badge" class="pts-tier pts-tier-bronze">BRONCE</span>
+          <p class="text-xs text-on-surface-variant" id="pts-after-msg">Después: <strong id="pts-after" class="text-on-surface">0</strong> pts</p>
+        </div>
+      </div>
+
+      <!-- Ajuste manual de puntos -->
+      <div id="pts-manual-section" class="hidden">
+        <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Ajustar puntos manualmente</label>
+        <div class="flex items-center gap-3">
+          <div class="flex-1 relative">
+            <input id="pts-manual-input" type="number" min="0" placeholder="0"
+              class="w-full bg-surface-container border-none rounded-full py-3 px-4 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-center"/>
+          </div>
+          <button onclick="setManualPts(-1)" class="w-10 h-10 rounded-full bg-error-container text-on-error-container flex items-center justify-center font-black text-xl hover:bg-error hover:text-white transition-all">−</button>
+          <button onclick="setManualPts(1)"  class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xl hover:bg-primary hover:text-white transition-all">+</button>
+        </div>
+        <p class="text-xs text-on-surface-variant mt-2">Dejá en 0 para usar los puntos automáticos. Podés restar puntos usando valores negativos.</p>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-8 pb-7 pt-4 border-t border-outline-variant/15 flex gap-3">
+      <button onclick="closeOrderWithoutPoints()"
+        class="flex-1 py-3.5 border border-outline-variant/40 text-on-surface-variant font-headline font-bold text-sm rounded-full hover:bg-surface-container transition-all">
+        Cobrar sin puntos
+      </button>
+      <button onclick="closeOrderWithPoints()"
+        id="pts-confirm-btn"
+        class="flex-1 py-3.5 bg-primary text-white font-headline font-black text-sm rounded-full shadow-md hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">stars</span>
+        <span id="pts-confirm-label">Cobrar y sumar puntos</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MODAL: AJUSTAR PUNTOS (admin) ══════════════ -->
+<div id="modal-adjust-points" class="hidden fixed inset-0 bg-on-surface/50 backdrop-blur-sm z-[130] flex items-center justify-center p-4">
+  <div class="bg-surface-container-lowest rounded-3xl w-full max-w-sm shadow-2xl fade-up overflow-hidden">
+    <div class="px-7 pt-7 pb-5 border-b border-outline-variant/15 flex items-center justify-between">
+      <h2 class="font-headline font-black text-lg text-on-surface">Ajustar Puntos</h2>
+      <button onclick="closeAdjustModal()" class="p-2 text-outline hover:bg-surface-container rounded-full transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="px-7 py-6 space-y-4">
+      <div id="adj-customer-info" class="flex items-center gap-3 bg-surface-container rounded-xl px-4 py-3">
+        <div id="adj-avatar" class="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center font-headline font-black text-primary">?</div>
+        <div>
+          <p id="adj-name" class="font-headline font-bold text-sm text-on-surface">—</p>
+          <p id="adj-pts-current" class="text-xs text-outline">0 puntos actuales</p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Puntos a sumar (+) o restar (−)</label>
+        <input id="adj-pts-input" type="number" placeholder="Ej: 100 o -50"
+          class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none text-center text-lg"/>
+      </div>
+      <div>
+        <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Motivo (opcional)</label>
+        <input id="adj-pts-note" type="text" placeholder="Ej: Promoción, error, regalo..."
+          class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
+      </div>
+    </div>
+    <div class="px-7 pb-7 flex gap-3">
+      <button onclick="closeAdjustModal()" class="flex-1 py-3 border border-outline-variant/40 text-on-surface-variant font-bold text-sm rounded-full hover:bg-surface-container transition-all">Cancelar</button>
+      <button onclick="confirmAdjustPoints()" class="flex-1 py-3 bg-primary text-white font-headline font-black text-sm rounded-full hover:opacity-90 active:scale-95 transition-all">
+        Aplicar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ALERTA 15 MIN ══════════════ -->
+<div id="alert-15min" class="hidden fixed top-6 right-6 z-[300] bg-error text-white px-5 py-4 rounded-2xl shadow-2xl max-w-xs fade-up">
   <div class="flex items-start gap-3">
     <span class="material-symbols-outlined text-2xl flex-shrink-0" style="font-variation-settings:'FILL' 1;">alarm</span>
     <div class="flex-1">
       <p class="font-headline font-black text-sm mb-1">⏰ ¡15 minutos!</p>
       <p id="alert-15min-text" class="text-xs font-medium opacity-90 mb-3">El pedido sigue sin entregar.</p>
       <div class="flex gap-2">
-        <button onclick="alertConfirmDelivered()"
-          class="flex-1 bg-white text-error py-2 rounded-full text-xs font-black hover:bg-white/90 transition-all">
-          Sí, ya se entregó
-        </button>
-        <button onclick="alertDismiss()"
-          class="flex-1 bg-white/20 text-white py-2 rounded-full text-xs font-bold hover:bg-white/30 transition-all">
-          Aún no
-        </button>
+        <button onclick="alertConfirmDelivered()" class="flex-1 bg-white text-error py-2 rounded-full text-xs font-black hover:bg-white/90 transition-all">Sí, ya se entregó</button>
+        <button onclick="alertDismiss()" class="flex-1 bg-white/20 text-white py-2 rounded-full text-xs font-bold hover:bg-white/30 transition-all">Aún no</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ===== MODAL SELECTOR DE MESA ===== -->
-<div id="modal-table" class="fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+<!-- ══════════════ MODAL: MESA ══════════════ -->
+<div id="modal-table" class="hidden fixed inset-0 bg-on-surface/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
   <div id="modal-content" class="bg-surface-container-lowest rounded-3xl w-full max-w-lg shadow-2xl fade-up overflow-hidden">
     <div class="px-8 pt-8 pb-6 border-b border-outline-variant/20">
       <div class="flex items-center justify-between mb-1">
@@ -263,9 +354,8 @@
       <p class="text-sm text-on-surface-variant">Elegí una mesa existente o creá una nueva</p>
       <div class="mt-5 relative">
         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">edit</span>
-        <input id="input-table-name" type="text"
-          placeholder="Nombre de mesa, cliente o pedido..."
-          class="w-full bg-surface-container-high border-2 border-transparent rounded-full py-4 pl-12 pr-4 font-headline font-bold text-on-surface placeholder:text-outline focus:ring-0 focus:border-primary focus:bg-white transition-all outline-none text-sm" />
+        <input id="input-table-name" type="text" placeholder="Nombre de mesa, cliente o pedido..."
+          class="w-full bg-surface-container-high border-2 border-transparent rounded-full py-4 pl-12 pr-4 font-headline font-bold text-on-surface placeholder:text-outline focus:ring-0 focus:border-primary focus:bg-white transition-all outline-none text-sm"/>
       </div>
     </div>
     <div class="px-8 py-6">
@@ -275,23 +365,23 @@
       </div>
       <p class="text-[10px] font-black text-outline uppercase tracking-widest mb-3">Acceso rápido</p>
       <div class="grid grid-cols-4 gap-2 mb-6">
-        <button onclick="pickQuick('Mesa 1')"  class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('Mesa 1')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">table_restaurant</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Mesa 1</span>
         </button>
-        <button onclick="pickQuick('Mesa 2')"  class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('Mesa 2')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">table_restaurant</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Mesa 2</span>
         </button>
-        <button onclick="pickQuick('Mesa 3')"  class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('Mesa 3')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">table_restaurant</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Mesa 3</span>
         </button>
-        <button onclick="pickQuick('Barra')"   class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('Barra')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">local_bar</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Barra</span>
         </button>
-        <button onclick="pickQuick('Llevar')"  class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('Llevar')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">takeout_dining</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Llevar</span>
         </button>
@@ -299,7 +389,7 @@
           <span class="material-symbols-outlined text-xl text-on-surface-variant">delivery_dining</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">Delivery</span>
         </button>
-        <button onclick="pickQuick('VIP')"     class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
+        <button onclick="pickQuick('VIP')" class="quick-btn flex flex-col items-center gap-1 bg-surface-container-high py-3 rounded-2xl">
           <span class="material-symbols-outlined text-xl text-on-surface-variant">star</span>
           <span class="text-xs font-headline font-bold text-on-surface-variant">VIP</span>
         </button>
@@ -316,11 +406,13 @@
     </div>
   </div>
 </div>
+
+<!-- ══════════════ MODAL: IMPRIMIR ══════════════ -->
 <div id="modal-print" class="hidden fixed inset-0 bg-on-surface/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
   <div class="bg-surface-container-lowest rounded-3xl w-full max-w-md shadow-2xl fade-up overflow-hidden">
     <div class="px-8 pt-8 pb-6 border-b border-outline-variant/20">
       <h2 class="font-headline font-black text-2xl text-on-surface mb-2">Imprimir Comanda</h2>
-      <p class="text-sm text-on-surface-variant">Seleccioná los items que querés enviar a preparación.</p>
+      <p class="text-sm text-on-surface-variant">Seleccioná los items a enviar a preparación.</p>
     </div>
     <div class="p-8 space-y-4">
       <button onclick="executePrint('todo')" class="w-full flex items-center justify-between p-4 bg-surface-container-high hover:bg-primary hover:text-white rounded-2xl transition-all group">
@@ -330,7 +422,6 @@
         </div>
         <span class="material-symbols-outlined opacity-0 group-hover:opacity-100">chevron_right</span>
       </button>
-      
       <div class="grid grid-cols-2 gap-4">
         <button onclick="executePrint('comida')" class="flex flex-col items-center gap-2 p-4 bg-orange-50 text-orange-700 hover:bg-orange-600 hover:text-white rounded-2xl transition-all">
           <span class="material-symbols-outlined text-3xl">restaurant</span>
@@ -341,16 +432,677 @@
           <span class="text-xs font-black uppercase">Solo Barra</span>
         </button>
       </div>
-
-      <button onclick="closePrintModal()" class="w-full py-4 text-outline font-bold text-sm hover:text-on-surface transition-colors">
-        Cancelar
-      </button>
+      <button onclick="closePrintModal()" class="w-full py-4 text-outline font-bold text-sm hover:text-on-surface transition-colors">Cancelar</button>
     </div>
   </div>
 </div>
-<!-- ===== TOAST ===== -->
+
+<!-- TOAST -->
 <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
 
-<script type="module" src="src/pages/terminal.js"></script>
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SUPABASE_URL  = 'https://sflleqzcdmaxzvkbgnns.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_DT1P9zuzWn2CO3y5kixg7w_1roSZHTV';
+const BUSINESS_ID   = '1222e4ad-e980-41bd-97e8-9962f4cc75a8';
+const API_URL       = 'https://pulsoback.onrender.com';
+const POINTS_RATE   = 100; // $100 = 1 punto
+
+const token      = localStorage.getItem('od_token');
+const businessId = localStorage.getItem('od_business_id') || BUSINESS_ID;
+const HEADERS      = { 'x-business-id': businessId, 'Authorization': `Bearer ${token}` };
+const JSON_HEADERS = { 'Content-Type': 'application/json', ...HEADERS };
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let allProducts          = [];
+let activeCategory       = 'Todos';
+let cartItems            = [];
+let currentTable         = null;
+let currentOrderId       = null;
+let currentOrderStatus   = null;
+let currentOrderCreatedAt= null;
+let activeTables         = [];
+let alert15Shown         = false;
+
+// Points modal state
+let selectedCustomer     = null;  // customer_profiles row
+let allCustomers         = [];    // cached for search
+let adjustCustomerId     = null;  // for the adjust modal
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+(function buildSidebar() {
+  const pages = [
+    { id: 'terminal',    icon: 'point_of_sale',  label: 'Terminal',          href: 'terminal.html' },
+    { id: 'orders',      icon: 'receipt_long',   label: 'Órdenes activas',   href: 'index.html' },
+    { id: 'inventario',  icon: 'inventory_2',    label: 'Inventario',        href: 'list-prod.html' },
+    { id: 'analytics',   icon: 'bar_chart',      label: 'Analytics',         href: 'analytics.html' },
+    { id: '---1', label: 'Menú Público' },
+    { id: 'banners',     icon: 'image',          label: 'Banners',           href: 'menu-admin.html' },
+    { id: 'cart-cfg',    icon: 'shopping_cart',  label: 'Carrito / Pedidos', href: 'menu-admin.html' },
+    { id: '---2', label: 'Clientes' },
+    { id: 'customers',   icon: 'group',          label: 'Usuarios',          href: 'menu-admin.html' },
+    { id: 'newsletter',  icon: 'mail',           label: 'Newsletter',        href: 'menu-admin.html' },
+    { id: '---3', label: 'Sistema' },
+    { id: 'import',      icon: 'upload_file',    label: 'Importar',          href: 'import-products.html' },
+    { id: 'setup',       icon: 'settings',       label: 'Configuración',     href: 'setup.html' },
+  ];
+
+  const navHtml = pages.map(p => {
+    if (p.id.startsWith('---')) return `<p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">${p.label}</p>`;
+    const active = p.id === 'terminal';
+    return `<a href="${p.href}" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:${active?700:600};text-decoration:none;color:${active?'#2b3896':'#454652'};background:${active?'rgba(43,56,150,.1)':'transparent'};transition:all .15s"
+      onmouseover="if(!this.style.background.includes('150'))this.style.background='#e9f6fd'" onmouseout="if(!this.style.background.includes('150'))this.style.background='transparent'">
+      <span class="material-symbols-outlined" style="font-size:1rem;color:${active?'#2b3896':'inherit'}">${p.icon}</span>${p.label}</a>`;
+  }).join('');
+
+  document.body.insertAdjacentHTML('afterbegin', `
+    <aside style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#fff;border-right:1px solid rgba(197,197,212,.3);display:flex;flex-direction:column;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+      <div style="padding:1.1rem 1.4rem;border-bottom:1px solid rgba(197,197,212,.2);display:flex;align-items:center;gap:.7rem">
+        <div style="width:2.1rem;height:2.1rem;background:#2b3896;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <span class="material-symbols-outlined" style="color:#fff;font-size:1rem;font-variation-settings:'FILL' 1">storefront</span>
+        </div>
+        <div>
+          <p style="font-family:Manrope,sans-serif;font-weight:900;font-size:.82rem;color:#111d23;line-height:1">OnceyDoce</p>
+          <p style="font-size:.58rem;color:#757684;margin-top:.15rem">Panel de control</p>
+        </div>
+      </div>
+      <nav style="flex:1;padding:.6rem;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem">${navHtml}</nav>
+      <div style="padding:.9rem;border-top:1px solid rgba(197,197,212,.2)">
+        <a href="menu.html" target="_blank" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border-radius:.65rem;background:#e9f6fd;text-decoration:none">
+          <span class="material-symbols-outlined" style="font-size:.9rem;color:#2b3896">open_in_new</span>
+          <span style="font-size:.68rem;font-weight:700;color:#2b3896;font-family:Manrope,sans-serif">Ver menú público</span>
+        </a>
+      </div>
+    </aside>`);
+})();
+
+// ── CART BUTTONS ──────────────────────────────────────────────────────────────
+function updateCartButtons() {
+  const isNew     = !currentOrderId || currentOrderStatus === null;
+  const isPending = currentOrderId && currentOrderStatus === 'pending';
+  const isOpen    = currentOrderId && currentOrderStatus === 'open';
+
+  document.getElementById('btn-section-new').classList.toggle('hidden', !isNew);
+  document.getElementById('btn-section-pending').classList.toggle('hidden', !isPending);
+  document.getElementById('btn-section-open').classList.toggle('hidden', !isOpen);
+  document.getElementById('btn-print-comanda').classList.toggle('hidden', isNew);
+
+  const badge = document.getElementById('order-status-badge');
+  const cfg = { pending: { text:'⏳ Pendiente', cls:'bg-amber-100 text-amber-800' }, open: { text:'✅ Activo', cls:'bg-green-100 text-green-800' }, closed: { text:'💳 Cerrado', cls:'bg-blue-100 text-blue-800' } }[currentOrderStatus];
+  if (cfg) { badge.textContent = cfg.text; badge.className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${cfg.cls}`; badge.classList.remove('hidden'); }
+  else badge.classList.add('hidden');
+}
+
+// ── POINTS MODAL ──────────────────────────────────────────────────────────────
+async function openPointsModal() {
+  if (!cartItems.length) { showToast('warn','Agregá productos al pedido primero'); return; }
+
+  const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+  document.getElementById('pts-modal-total').textContent = '$' + total.toLocaleString('es-AR');
+  document.getElementById('pts-search').value = '';
+  document.getElementById('pts-results').classList.add('hidden');
+  document.getElementById('pts-results').innerHTML = '';
+  clearSelectedCustomer();
+
+  // Load customers for search
+  if (!allCustomers.length) {
+    try {
+      const { data } = await sb.from('customer_profiles').select('*').eq('business_id', BUSINESS_ID);
+      allCustomers = data || [];
+    } catch {}
+  }
+
+  document.getElementById('modal-points').classList.remove('hidden');
+  document.getElementById('modal-points').classList.add('flex');
+  setTimeout(() => document.getElementById('pts-search').focus(), 80);
+}
+
+function closePointsModal() {
+  document.getElementById('modal-points').classList.replace('flex','hidden');
+}
+
+function searchCustomer() {
+  const q = document.getElementById('pts-search').value.toLowerCase().trim();
+  const res = document.getElementById('pts-results');
+  if (!q) { res.classList.add('hidden'); return; }
+
+  const matches = allCustomers.filter(c =>
+    (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q)
+  ).slice(0, 6);
+
+  if (!matches.length) {
+    res.innerHTML = `<p class="text-xs text-outline text-center py-3">Sin resultados</p>`;
+    res.classList.remove('hidden');
+    return;
+  }
+
+  res.classList.remove('hidden');
+  res.innerHTML = matches.map(c => `
+    <button onclick="selectCustomer('${c.id}')"
+      class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-container-low transition-colors text-left">
+      <div class="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center font-headline font-black text-xs text-primary flex-shrink-0">
+        ${(c.full_name||c.email||'?').charAt(0).toUpperCase()}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-bold text-on-surface truncate">${escHtml(c.full_name||'Sin nombre')}</p>
+        <p class="text-xs text-outline truncate">${escHtml(c.email||'')} · ${(c.points||0)} pts</p>
+      </div>
+    </button>
+  `).join('');
+}
+
+function selectCustomer(id) {
+  selectedCustomer = allCustomers.find(c => c.id === id);
+  if (!selectedCustomer) return;
+
+  const total   = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+  const toEarn  = Math.floor(total / POINTS_RATE);
+  const current = selectedCustomer.points || 0;
+  const after   = current + toEarn;
+  const tier    = getTierClass(after);
+
+  document.getElementById('pts-avatar').textContent    = (selectedCustomer.full_name||selectedCustomer.email||'?').charAt(0).toUpperCase();
+  document.getElementById('pts-name').textContent      = selectedCustomer.full_name || 'Sin nombre';
+  document.getElementById('pts-email').textContent     = selectedCustomer.email || '';
+  document.getElementById('pts-current').textContent   = current.toLocaleString('es-AR');
+  document.getElementById('pts-to-earn').textContent   = toEarn;
+  document.getElementById('pts-after').textContent     = after.toLocaleString('es-AR');
+  document.getElementById('pts-tier-badge').textContent= tier.name;
+  document.getElementById('pts-tier-badge').className  = `pts-tier pts-tier-${tier.cls}`;
+  document.getElementById('pts-after-msg').innerHTML   = `Después: <strong class="text-on-surface">${after.toLocaleString('es-AR')}</strong> pts`;
+
+  // Manual input
+  document.getElementById('pts-manual-input').value = toEarn;
+
+  document.getElementById('pts-selected-customer').classList.remove('hidden');
+  document.getElementById('pts-manual-section').classList.remove('hidden');
+  document.getElementById('pts-results').classList.add('hidden');
+  document.getElementById('pts-search').value = '';
+  document.getElementById('pts-confirm-label').textContent = `Cobrar y sumar ${toEarn} pts`;
+}
+
+function clearSelectedCustomer() {
+  selectedCustomer = null;
+  document.getElementById('pts-selected-customer').classList.add('hidden');
+  document.getElementById('pts-manual-section').classList.add('hidden');
+  document.getElementById('pts-confirm-label').textContent = 'Cobrar y sumar puntos';
+}
+
+function setManualPts(delta) {
+  const el  = document.getElementById('pts-manual-input');
+  const cur = parseInt(el.value) || 0;
+  el.value  = Math.max(-9999, cur + delta);
+}
+
+async function closeOrderWithPoints() {
+  const ptsToAdd = selectedCustomer ? (parseInt(document.getElementById('pts-manual-input').value) || 0) : 0;
+
+  closePointsModal();
+  await doCloseOrder();
+
+  if (selectedCustomer && ptsToAdd !== 0) {
+    await applyPoints(selectedCustomer.id, ptsToAdd, `Pago mesa ${currentTable || '—'}`);
+    showToast('ok', `✓ Mesa cerrada · ${ptsToAdd > 0 ? '+' + ptsToAdd : ptsToAdd} pts a ${selectedCustomer.full_name || 'cliente'}`);
+    // Update local cache
+    const cached = allCustomers.find(c => c.id === selectedCustomer.id);
+    if (cached) cached.points = (cached.points || 0) + ptsToAdd;
+  } else {
+    showToast('ok', `✓ Mesa cerrada`);
+  }
+}
+
+async function closeOrderWithoutPoints() {
+  closePointsModal();
+  await doCloseOrder();
+  showToast('ok', `✓ Mesa cerrada`);
+}
+
+async function applyPoints(customerId, pts, note = '') {
+  try {
+    // Log transaction
+    await sb.from('customer_points_log').insert([{
+      customer_id: customerId, business_id: BUSINESS_ID, points: pts, note
+    }]);
+    // Update profile total
+    const { data: profile } = await sb.from('customer_profiles').select('points,total_orders,total_spent').eq('id', customerId).single();
+    const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    await sb.from('customer_profiles').update({
+      points:       (profile?.points || 0) + pts,
+      total_orders: (profile?.total_orders || 0) + 1,
+      total_spent:  (profile?.total_spent  || 0) + total,
+      updated_at:   new Date().toISOString()
+    }).eq('id', customerId);
+  } catch (e) {
+    console.error('applyPoints error:', e);
+    showToast('warn', 'Puntos no guardados: ' + (e.message || 'tabla no encontrada'));
+  }
+}
+
+// ── ADJUST POINTS MODAL (admin use) ──────────────────────────────────────────
+// Callable from menu-admin or from a future customers panel
+window.openAdjustPoints = function(customerId) {
+  const c = allCustomers.find(x => x.id === customerId);
+  if (!c) { showToast('warn','Cliente no encontrado'); return; }
+  adjustCustomerId = customerId;
+  document.getElementById('adj-avatar').textContent      = (c.full_name||c.email||'?').charAt(0).toUpperCase();
+  document.getElementById('adj-name').textContent        = c.full_name || 'Sin nombre';
+  document.getElementById('adj-pts-current').textContent = `${(c.points||0).toLocaleString('es-AR')} puntos actuales`;
+  document.getElementById('adj-pts-input').value         = '';
+  document.getElementById('adj-pts-note').value          = '';
+  document.getElementById('modal-adjust-points').classList.remove('hidden');
+  document.getElementById('modal-adjust-points').classList.add('flex');
+  setTimeout(() => document.getElementById('adj-pts-input').focus(), 80);
+};
+
+window.closeAdjustModal = () => {
+  document.getElementById('modal-adjust-points').classList.replace('flex','hidden');
+  adjustCustomerId = null;
+};
+
+window.confirmAdjustPoints = async () => {
+  const pts  = parseInt(document.getElementById('adj-pts-input').value);
+  const note = document.getElementById('adj-pts-note').value.trim() || 'Ajuste manual';
+  if (!pts || isNaN(pts)) { showToast('warn','Ingresá un valor'); return; }
+  if (!adjustCustomerId)  { showToast('warn','Sin cliente seleccionado'); return; }
+
+  await applyPoints(adjustCustomerId, pts, note);
+  const cached = allCustomers.find(c => c.id === adjustCustomerId);
+  if (cached) cached.points = (cached.points || 0) + pts;
+  closeAdjustModal();
+  showToast('ok', `${pts > 0 ? '+' : ''}${pts} puntos aplicados`);
+};
+
+// ── TIER HELPER ───────────────────────────────────────────────────────────────
+function getTierClass(pts) {
+  if (pts >= 3000) return { name:'CULT',   cls:'cult'   };
+  if (pts >= 1500) return { name:'ORO',    cls:'gold'   };
+  if (pts >= 500)  return { name:'PLATA',  cls:'silver' };
+  return                   { name:'BRONCE', cls:'bronze' };
+}
+
+// ── CLOSE ORDER (sin puntos) ──────────────────────────────────────────────────
+async function doCloseOrder() {
+  const paymentMethod = document.getElementById('payment-method')?.value || 'cash';
+
+  if (confirm('¿Querés imprimir el ticket?')) printTicket();
+
+  try {
+    if (currentOrderId) {
+      await fetch(`${API_URL}/orders/close/${currentOrderId}`, {
+        method: 'POST', headers: JSON_HEADERS,
+        body: JSON.stringify({ payment_method: paymentMethod }),
+      });
+    }
+  } catch {}
+
+  cartItems             = [];
+  currentTable          = null;
+  currentOrderId        = null;
+  currentOrderStatus    = null;
+  currentOrderCreatedAt = null;
+  alert15Shown          = false;
+  selectedCustomer      = null;
+  updateTableBadges();
+  updateCartButtons();
+  document.getElementById('order-id').textContent = '#NUEVA';
+  renderCartUI();
+  await loadActiveTables();
+  setTimeout(() => openTableModal(), 1200);
+}
+
+// ── PRODUCTS ──────────────────────────────────────────────────────────────────
+async function loadProducts() {
+  try {
+    const res = await fetch(`${API_URL}/products`, { headers: HEADERS });
+    allProducts = await res.json();
+    renderAllProducts();
+  } catch {}
+}
+
+function renderAllProducts() {
+  const favs = allProducts.filter(p => p.is_favorite);
+  const all  = applySearch(applyCategory(allProducts));
+
+  // Favorites row
+  const fg = document.getElementById('favorites-grid');
+  fg.innerHTML = favs.map(p => buildFavCard(p)).join('');
+
+  // Main grid
+  document.getElementById('main-grid').innerHTML = all.map(p => buildMainCard(p)).join('');
+
+  // Category pills
+  const cats = ['Todos', ...new Set(allProducts.map(p => p.category).filter(Boolean)).values()].sort((a,b) => a==='Todos'?-1:b==='Todos'?1:a.localeCompare(b));
+  document.getElementById('category-filters').innerHTML = cats.map(c => `
+    <button onclick="setCategory('${escHtml(c)}')" class="cat-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-headline font-bold text-on-surface-variant bg-surface-container hover:bg-surface-container-high transition-all ${c===activeCategory?'active':''}">
+      ${escHtml(c)}
+    </button>`).join('');
+}
+
+function applySearch(list) {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  return q ? list.filter(p => p.name.toLowerCase().includes(q) || (p.category||'').toLowerCase().includes(q)) : list;
+}
+
+function applyCategory(list) {
+  return activeCategory === 'Todos' ? list : list.filter(p => p.category === activeCategory);
+}
+
+window.setCategory = (cat) => { activeCategory = cat; renderAllProducts(); };
+window.filterProducts = () => { renderAllProducts(); };
+
+function buildFavCard(p) {
+  return `<div class="product-card flex-shrink-0 w-36 bg-surface-container-low rounded-2xl overflow-hidden cursor-pointer shadow-sm" onclick="addToCart('${p.id}')">
+    <div class="h-24 overflow-hidden bg-surface-container flex items-center justify-center relative">
+      ${p.image_url ? `<img src="${escHtml(p.image_url)}" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-3xl text-outline/40">fastfood</span>`}
+    </div>
+    <div class="p-2.5">
+      <p class="font-headline font-bold text-xs text-on-surface truncate">${escHtml(p.name)}</p>
+      <p class="text-primary font-headline font-black text-sm mt-0.5">$${parseFloat(p.price||0).toLocaleString('es-AR')}</p>
+    </div>
+  </div>`;
+}
+
+function buildMainCard(p) {
+  const stock = p.stock || 0;
+  const stockBadge = stock <= 0
+    ? `<span class="text-[9px] font-black text-error uppercase">Sin stock</span>`
+    : stock < 5 ? `<span class="text-[9px] font-black text-amber-600 uppercase">Bajo (${stock})</span>` : '';
+  return `<div class="product-card bg-surface-container-lowest rounded-2xl overflow-hidden cursor-pointer shadow-sm border border-outline-variant/10 hover:shadow-md hover:border-primary/20" onclick="addToCart('${p.id}')">
+    <div class="h-32 overflow-hidden bg-surface-container-high flex items-center justify-center relative">
+      ${p.image_url ? `<img src="${escHtml(p.image_url)}" class="w-full h-full object-cover"/>` : `<span class="material-symbols-outlined text-4xl text-outline/30">fastfood</span>`}
+      ${p.category ? `<span class="absolute top-2 left-2 bg-surface-container-lowest/90 text-on-surface-variant px-2 py-0.5 rounded-full text-[9px] font-bold">${escHtml(p.category)}</span>` : ''}
+    </div>
+    <div class="p-4">
+      <p class="font-headline font-bold text-sm text-on-surface mb-1">${escHtml(p.name)}</p>
+      <div class="flex items-center justify-between">
+        <p class="font-headline font-black text-base text-primary">$${parseFloat(p.price||0).toLocaleString('es-AR')}</p>
+        ${stockBadge}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── CART ──────────────────────────────────────────────────────────────────────
+window.addToCart = function(productId) {
+  const p = allProducts.find(x => x.id === productId);
+  if (!p) return;
+  const ex = cartItems.find(i => i.id === productId);
+  if (ex) ex.quantity++;
+  else cartItems.push({ id: p.id, name: p.name, price: parseFloat(p.price||0), category: p.category||'', quantity: 1, itemId: null, note: '' });
+  renderCartUI();
+  if (currentOrderId) syncItemToBackend(p.id, 1);
+  showToast('add', `+ ${p.name}`);
+};
+
+async function syncItemToBackend(productId, qty) {
+  try {
+    await fetch(`${API_URL}/orders/add-item`, {
+      method: 'POST', headers: JSON_HEADERS,
+      body: JSON.stringify({ order_id: currentOrderId, product_id: productId, quantity: qty }),
+    });
+  } catch {}
+}
+
+window.removeFromCart = function(id) {
+  const item = cartItems.find(i => i.id === id);
+  if (!item) return;
+  if (item.quantity > 1) item.quantity--;
+  else cartItems = cartItems.filter(i => i.id !== id);
+  renderCartUI();
+};
+
+window.clearCart = function() {
+  if (!cartItems.length) return;
+  if (!confirm('¿Limpiar el pedido?')) return;
+  cartItems = [];
+  renderCartUI();
+};
+
+window.addNote = function(id) {
+  const item = cartItems.find(i => i.id === id);
+  const note = prompt('Nota para cocina/barra:', item?.note || '');
+  if (note !== null && item) { item.note = note; renderCartUI(); }
+};
+
+function renderCartUI() {
+  const container = document.getElementById('cart-items');
+  const subtotalEl = document.getElementById('subtotal');
+  const totalEl   = document.getElementById('total');
+
+  if (!cartItems.length) {
+    container.innerHTML = `
+      <div class="flex flex-col items-center justify-center h-full text-center py-12 opacity-40">
+        <span class="material-symbols-outlined text-5xl mb-3 text-outline">shopping_cart</span>
+        <p class="font-headline font-bold text-on-surface-variant text-sm uppercase tracking-widest">Pedido vacío</p>
+        <p class="text-xs text-outline mt-1">Seleccioná productos del menú</p>
+      </div>`;
+  } else {
+    container.innerHTML = cartItems.map(item => `
+      <div class="cart-item-enter flex items-center gap-3 bg-surface-container rounded-2xl p-3 group">
+        <div class="flex-1 min-w-0">
+          <p class="font-headline font-bold text-sm text-on-surface truncate">${escHtml(item.name)}</p>
+          ${item.note ? `<p class="text-xs text-amber-600 font-medium truncate">📝 ${escHtml(item.note)}</p>` : ''}
+          <p class="text-primary font-bold text-sm mt-0.5">$${(item.price * item.quantity).toLocaleString('es-AR')}</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="addNote('${item.id}')" class="p-1.5 text-outline hover:text-amber-500 rounded-full hover:bg-amber-50 transition-all opacity-0 group-hover:opacity-100">
+            <span class="material-symbols-outlined text-sm">edit_note</span>
+          </button>
+          <button onclick="removeFromCart('${item.id}')" class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-error hover:text-white flex items-center justify-center font-black text-base transition-all">−</button>
+          <span class="font-headline font-black text-sm text-on-surface min-w-[1.4rem] text-center">${item.quantity}</span>
+          <button onclick="addToCart('${item.id}')" class="w-7 h-7 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white flex items-center justify-center font-black text-base transition-all">+</button>
+        </div>
+      </div>`).join('');
+  }
+
+  const subtotal = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+  subtotalEl.textContent = '$' + subtotal.toLocaleString('es-AR');
+  totalEl.textContent    = '$' + subtotal.toLocaleString('es-AR');
+}
+
+function updateTableBadges() {
+  const label = currentTable || 'Sin mesa';
+  document.getElementById('current-table-label').textContent = label;
+  document.getElementById('display-table').textContent       = currentTable || 'Sin Mesa';
+}
+
+// ── ACTIVE TABLES ─────────────────────────────────────────────────────────────
+async function loadActiveTables() {
+  try {
+    const res = await fetch(`${API_URL}/orders/active`, { headers: HEADERS });
+    activeTables = res.ok ? await res.json() : [];
+  } catch { activeTables = []; }
+}
+
+// ── 15 MIN ALERT ──────────────────────────────────────────────────────────────
+function checkPendingAlerts() {
+  const now = Date.now();
+  if (currentOrderId && currentOrderStatus === 'pending' && currentOrderCreatedAt && !alert15Shown) {
+    if (now - new Date(currentOrderCreatedAt).getTime() >= 15*60*1000) {
+      alert15Shown = true;
+      showAlert15(currentTable, currentOrderId, true);
+    }
+  }
+}
+function showAlert15(table, orderId, isCurrent) {
+  document.getElementById('alert-15min-text').textContent = `La mesa "${table}" lleva más de 15 min sin entregar.`;
+  document.getElementById('alert-15min').dataset.orderId = orderId;
+  document.getElementById('alert-15min').dataset.isCurrentOrder = isCurrent ? '1' : '0';
+  document.getElementById('alert-15min').classList.remove('hidden');
+}
+window.alertConfirmDelivered = async () => {
+  const el = document.getElementById('alert-15min');
+  const id = el.dataset.orderId;
+  el.classList.add('hidden');
+  try {
+    await fetch(`${API_URL}/orders/${id}/mark-delivered`, { method:'PATCH', headers: HEADERS });
+    if (el.dataset.isCurrentOrder === '1') { currentOrderStatus = 'open'; updateCartButtons(); }
+    showToast('ok','✓ Pedido marcado como entregado');
+    await loadActiveTables();
+  } catch { showToast('warn','Error actualizando estado'); }
+};
+window.alertDismiss = () => document.getElementById('alert-15min').classList.add('hidden');
+setInterval(checkPendingAlerts, 60_000);
+
+// ── TABLE MODAL ───────────────────────────────────────────────────────────────
+window.openTableModal = () => {
+  const modal = document.getElementById('modal-table');
+  modal.classList.remove('hidden');
+  document.getElementById('btn-close-modal').classList.toggle('hidden', !currentTable);
+  renderActiveTablesInModal();
+  setTimeout(() => document.getElementById('input-table-name').focus(), 50);
+};
+window.closeTableModal = () => document.getElementById('modal-table').classList.add('hidden');
+
+function renderActiveTablesInModal() {
+  const section = document.getElementById('active-tables-section');
+  const grid    = document.getElementById('active-tables-grid');
+  if (!activeTables.length) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  grid.innerHTML = activeTables.map(t => `
+    <button onclick="pickQuick('${t.table_id}')" class="quick-btn active-table flex items-center gap-2 px-4 py-2 rounded-full text-xs font-headline font-bold">
+      <span class="material-symbols-outlined text-sm">table_restaurant</span>
+      ${t.status==='pending'?'⏳':'✅'} ${t.table_id}
+      <span class="bg-primary/20 text-primary px-1.5 py-0.5 rounded-full text-[9px] font-black">$${(t.total||0).toLocaleString('es-AR')}</span>
+    </button>`).join('');
+}
+
+window.pickQuick = (name) => {
+  document.getElementById('input-table-name').value = name;
+  confirmTableSelection();
+};
+
+window.confirmTableSelection = async () => {
+  const name = document.getElementById('input-table-name').value.trim();
+  if (!name) { showToast('warn','Ingresá el nombre de la mesa'); return; }
+  closeTableModal();
+  document.getElementById('input-table-name').value = '';
+  currentTable = name;
+  cartItems    = [];
+  alert15Shown = false;
+  selectedCustomer = null;
+
+  try {
+    let res = await fetch(`${API_URL}/orders/table/${encodeURIComponent(name)}`, { headers: HEADERS });
+    let order;
+    if (res.status === 404) {
+      const cr = await fetch(`${API_URL}/orders`, { method:'POST', headers: JSON_HEADERS, body: JSON.stringify({ table_id: name }) });
+      order = await cr.json();
+    } else {
+      order = await res.json();
+    }
+    currentOrderId         = order.id;
+    currentOrderStatus     = order.status;
+    currentOrderCreatedAt  = order.created_at;
+    document.getElementById('order-id').textContent = `#${order.id?.slice(-6).toUpperCase() || 'NUEVA'}`;
+    cartItems = (order.order_items || []).map(it => ({
+      id: it.products?.id || it.product_id,
+      name: it.products?.name || 'Producto',
+      price: parseFloat(it.products?.price || 0),
+      category: it.products?.category || '',
+      quantity: it.quantity || 1,
+      itemId: it.id,
+      note: it.note || ''
+    }));
+  } catch {
+    currentOrderId = null; currentOrderStatus = null;
+    document.getElementById('order-id').textContent = '#NUEVA';
+  }
+
+  updateTableBadges();
+  renderCartUI();
+  updateCartButtons();
+  await loadActiveTables();
+};
+
+// ── ORDER ACTIONS ─────────────────────────────────────────────────────────────
+window.confirmOrder = async () => {
+  if (!cartItems.length) { showToast('warn','Agregá productos primero'); return; }
+  const paymentMethod = document.getElementById('payment-method')?.value || 'cash';
+  try {
+    if (!currentOrderId) {
+      const res = await fetch(`${API_URL}/orders`, { method:'POST', headers: JSON_HEADERS, body: JSON.stringify({ table_id: currentTable }) });
+      const order = await res.json();
+      currentOrderId = order.id;
+      for (const item of cartItems) {
+        await fetch(`${API_URL}/orders/add-item`, { method:'POST', headers: JSON_HEADERS, body: JSON.stringify({ order_id: currentOrderId, product_id: item.id, quantity: item.quantity }) });
+      }
+    }
+    const res = await fetch(`${API_URL}/orders/${currentOrderId}/confirm`, { method:'POST', headers: JSON_HEADERS });
+    if (!res.ok) throw new Error();
+    currentOrderStatus = 'pending';
+    updateCartButtons();
+    showToast('ok','✓ Pedido enviado a cocina');
+  } catch { showToast('warn','Error confirmando pedido'); }
+};
+
+window.markCurrentOrderDelivered = async () => {
+  try {
+    await fetch(`${API_URL}/orders/${currentOrderId}/mark-delivered`, { method:'PATCH', headers: HEADERS });
+    currentOrderStatus = 'open';
+    updateCartButtons();
+    showToast('ok','✓ Entregado');
+  } catch { showToast('warn','Error'); }
+};
+
+// ── PRINT ─────────────────────────────────────────────────────────────────────
+window.printComanda = () => {
+  if (!cartItems.length) { showToast('warn','Sin productos'); return; }
+  document.getElementById('modal-print').classList.remove('hidden');
+};
+window.closePrintModal = () => document.getElementById('modal-print').classList.add('hidden');
+window.executePrint = (type) => {
+  closePrintModal();
+  let items = cartItems;
+  if (type === 'comida') items = cartItems.filter(i => /cocin|comid|hambur|plato/i.test(i.category));
+  if (type === 'bebida') items = cartItems.filter(i => /barr|bebid|cerve|trago|caf/i.test(i.category));
+  if (!items.length) { showToast('warn',`Sin items de ${type}`); return; }
+  const diffMin = currentOrderCreatedAt ? Math.floor((Date.now()-new Date(currentOrderCreatedAt))/60000) : 0;
+  const lines = items.map(i => `${i.quantity}x ${i.name.toUpperCase()}${i.note?'\n   (!) '+i.note:''}`).join('\n');
+  const win = window.open('','_blank','width=340,height=600');
+  win.document.write(`<html><body style="font-family:monospace;padding:20px;font-size:14px"><div style="text-align:center;border-bottom:1px dashed #000;padding-bottom:10px;margin-bottom:15px"><h3 style="margin:0">COMANDA</h3><h1 style="margin:5px 0;font-size:28px">${currentTable}</h1><p style="margin:0">+ ${diffMin} min</p></div><pre style="white-space:pre-wrap;font-weight:bold;line-height:1.4">${lines}</pre></body></html>`);
+  win.document.close();
+  setTimeout(() => { win.print(); win.close(); }, 250);
+};
+
+function printTicket() {
+  const lines = cartItems.map(i => `${i.quantity}x ${i.name.substring(0,22).padEnd(22,' ')} $${(i.price*i.quantity).toLocaleString('es-AR')}`).join('\n');
+  const total = cartItems.reduce((s,i)=>s+i.price*i.quantity,0);
+  const payMethod = document.getElementById('payment-method')?.value || 'cash';
+  const payLabels = { cash:'Efectivo', card:'Tarjeta', qr:'QR / Transferencia' };
+  const win = window.open('','_blank','width=340,height=600');
+  win.document.write(`<!DOCTYPE html><html><body style="font-family:monospace;padding:24px;margin:0"><h2 style="text-align:center;margin:0 0 4px">OnceyDoce</h2><p style="text-align:center;font-size:13px;margin:0 0 2px"><b>${currentTable}</b></p><p style="text-align:center;font-size:11px;color:#666;margin:0 0 12px">${new Date().toLocaleString('es-AR')}</p><hr style="border:1px dashed #000"><pre style="font-size:13px;line-height:1.8;margin:12px 0">${lines}</pre><hr style="border:1px dashed #000"><p style="text-align:right;font-size:18px"><b>TOTAL: $${total.toLocaleString('es-AR')}</b></p><p style="text-align:right;font-size:12px;color:#666">Pago: ${payLabels[payMethod]||payMethod}</p><p style="text-align:center;font-size:12px;margin:12px 0">¡Gracias por tu visita!</p></body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function showToast(type, msg) {
+  const icons = { ok:'check_circle', warn:'warning', add:'add_circle' };
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="material-symbols-outlined text-sm">${icons[type]||'info'}</span>${msg}`;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.style.opacity = '0', 2500);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeTableModal(); closePointsModal(); closeAdjustModal(); }
+  if (e.key === 'Enter' && document.activeElement?.id === 'input-table-name') confirmTableSelection();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await Promise.all([loadProducts(), loadActiveTables()]);
+  renderCartUI();
+  updateCartButtons();
+  openTableModal();
+})();
+</script>
 </body>
 </html>
