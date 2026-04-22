@@ -326,19 +326,25 @@ let modalQty        = 1;
 let showingFavsOnly = false;
 
 // ── SUPABASE FETCH ──────────────────────────────────────
-async function supabaseFetch(table, params = '') {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/${table}?${params}`,
-    {
-      headers: {
-        'apikey': SUPABASE_ANON,
-        'Authorization': `Bearer ${SUPABASE_ANON}`,
-        'Content-Type': 'application/json'
-      }
+async function supabaseFetch(tableName) {
+  // Hardcodeamos VENTAS para asegurar que use la tabla correcta
+  const targetTable = 'VENTAS'; 
+  
+  // Construimos la URL con tus columnas reales
+  // Eliminamos is_active e is_favorite porque no se ven en tu captura
+  const url = `${SUPABASE_URL}/rest/v1/${targetTable}?business_id=eq.${BUSINESS_ID}&select=id,nombre,descripcion,precio_venta,categoria,imagen_url,stock`;
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'apikey': SUPABASE_ANON,
+      'Authorization': `Bearer ${SUPABASE_ANON}`,
+      'Content-Type': 'application/json'
     }
-  );
-  if (!res.ok) throw new Error(`Supabase error: ${res.status}`);
-  return res.json();
+  });
+
+  if (!response.ok) throw new Error(`Supabase error: ${response.status}`);
+  return await response.json();
 }
 
 // ── INIT ────────────────────────────────────────────────
@@ -562,17 +568,17 @@ function buildBigCard(p) {
     <div class="bg-surface-container-low rounded-2xl overflow-hidden relative product-card cursor-pointer group" onclick="openProductModal('${p.id}')">
       <div class="h-64 overflow-hidden relative">
         ${p.image_url
-          ? `<img src="${escHtml(p.image_url)}" alt="${escHtml(p.name)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"/>`
+          ? `<img src="${item.imagen_url || 'placeholder.jpg'}" alt="${item.nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"/>`
           : `<div class="w-full h-full bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-on-surface-variant">fastfood</span></div>`
         }
         ${badge}
       </div>
       <div class="p-6">
         <div class="flex justify-between items-start mb-2">
-          <h4 class="font-headline font-extrabold text-xl text-white uppercase tracking-tight flex-1 pr-3 leading-tight">${escHtml(p.name)}</h4>
-          <span class="text-primary font-headline font-bold text-xl whitespace-nowrap">${formatPrice(p.price)}</span>
+          <h4 class="font-headline font-extrabold text-xl text-white uppercase tracking-tight flex-1 pr-3 leading-tight">${item.nombre}</h4>
+          <span class="text-primary font-headline font-bold text-xl whitespace-nowrap">${formatPrice(item.precio_venta)}</span>
         </div>
-        ${p.description ? `<p class="text-on-surface-variant text-sm mb-4 leading-snug line-clamp-2">${escHtml(p.description)}</p>` : '<div class="mb-4"></div>'}
+        ${p.description ? `<p class="text-on-surface-variant text-sm mb-4 leading-snug line-clamp-2">${item.descripcion || ''}</p>` : '<div class="mb-4"></div>'}
         <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="w-full bg-surface-container-highest py-3 rounded-lg text-white font-headline font-bold text-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center gap-2">
           ${cartQty > 0 ? `<span class="bg-primary text-on-primary rounded-full w-5 h-5 text-xs flex items-center justify-center font-black">${cartQty}</span>` : ''}
           Agregar
