@@ -43,44 +43,44 @@ tailwind.config = {
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #c5c5d4; border-radius: 10px; }
- 
+
   @keyframes fadeRow { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
   .row-enter { animation: fadeRow 0.2s ease-out forwards; }
- 
+
   @keyframes fadeUp { from { opacity:0; transform:translateY(16px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
   .modal-enter { animation: fadeUp 0.25s ease-out; }
- 
+
   @keyframes shimmer { 0%{background-position:-200px 0} 100%{background-position:calc(200px + 100%) 0} }
   .skeleton { background: linear-gradient(90deg, #e3f0f8 25%, #f4faff 50%, #e3f0f8 75%); background-size: 400px 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: 6px; }
- 
+
   /* Sidebar nav item active */
   .nav-item { @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer; }
   .nav-item.active { @apply bg-primary/10 text-primary font-bold; }
- 
+
   /* Tab active */
   .tab-btn { @apply px-5 py-2.5 rounded-xl text-sm font-headline font-semibold text-on-surface-variant transition-all; }
   .tab-btn.active { @apply bg-primary text-white shadow-md; }
- 
+
   /* Toggle switch */
   .toggle-track { @apply relative w-12 h-6 rounded-full transition-all duration-300 cursor-pointer; }
   .toggle-knob  { @apply absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300; }
- 
+
   /* Section panel */
   .section-panel { display: none; }
   .section-panel.active { display: block; }
- 
+
   /* Banner card drag handle */
   .banner-card { transition: box-shadow .2s; }
   .banner-card:hover { box-shadow: 0 8px 32px rgba(43,56,150,.12); }
- 
+
   /* User row */
   .user-row:hover { background: #e9f6fd; }
- 
+
   /* Status dot */
   .dot-green { background: #22c55e; }
   .dot-amber { background: #f59e0b; }
   .dot-red   { background: #ef4444; }
- 
+
   /* Tier badge */
   .tier-bronze { background:#cd7f32; color:#fff; }
   .tier-silver { background:#8e9bb5; color:#fff; }
@@ -89,7 +89,7 @@ tailwind.config = {
 </style>
 </head>
 <body class="bg-surface-dim text-on-surface">
- 
+
 <!-- ══════════════════════════════════════════════════
      SIDEBAR
 ══════════════════════════════════════════════════ -->
@@ -106,7 +106,7 @@ tailwind.config = {
       </div>
     </div>
   </div>
- 
+
   <!-- Nav -->
   <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar">
     <p class="px-4 py-2 text-[9px] font-black text-outline uppercase tracking-widest">Menú</p>
@@ -126,7 +126,7 @@ tailwind.config = {
       <span class="material-symbols-outlined text-xl">shopping_cart</span>
       Carrito / Pedidos
     </div>
- 
+
     <p class="px-4 py-2 mt-3 text-[9px] font-black text-outline uppercase tracking-widest">Clientes</p>
     <div class="nav-item" onclick="goTo('customers')">
       <span class="material-symbols-outlined text-xl">group</span>
@@ -137,14 +137,14 @@ tailwind.config = {
       <span class="material-symbols-outlined text-xl">mail</span>
       Newsletter
     </div>
- 
+
     <p class="px-4 py-2 mt-3 text-[9px] font-black text-outline uppercase tracking-widest">Sistema</p>
     <div class="nav-item" onclick="goTo('products')">
       <span class="material-symbols-outlined text-xl">inventory_2</span>
       <a href="list-prod.html" class="w-full">Inventario</a>
     </div>
   </nav>
- 
+
   <!-- Bottom user pill -->
   <div class="px-4 py-4 border-t border-outline-variant/15">
     <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-container">
@@ -158,7 +158,7 @@ tailwind.config = {
     </div>
   </div>
 </aside>
- 
+
 <!-- ══════════════════════════════════════════════════
      TOPBAR
 ══════════════════════════════════════════════════ -->
@@ -179,12 +179,12 @@ tailwind.config = {
     </div>
   </div>
 </header>
- 
+
 <!-- ══════════════════════════════════════════════════
      MAIN
 ══════════════════════════════════════════════════ -->
 <main class="ml-64 mt-16 p-8 min-h-[calc(100vh-4rem)]">
- 
+
   <!-- ─── BANNERS ─────────────────────────────────────────── -->
   <div id="section-banners" class="section-panel active">
     <div class="flex items-center justify-between mb-6">
@@ -197,7 +197,7 @@ tailwind.config = {
         Nuevo Banner
       </button>
     </div>
- 
+
     <!-- Grid of banners -->
     <div id="banners-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Populated by JS -->
@@ -211,7 +211,7 @@ tailwind.config = {
       <div class="skeleton h-48 rounded-2xl"></div>
       <div class="skeleton h-48 rounded-2xl"></div>
     </div>
- 
+
     <!-- Table below: SQL hint -->
     <div class="mt-6 bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/20">
       <p class="text-xs font-black text-outline uppercase tracking-widest mb-2">Tabla Supabase requerida</p>
@@ -231,7 +231,7 @@ tailwind.config = {
 create policy "admin_banners" on banners for all using (true);</code></pre>
     </div>
   </div>
- 
+
   <!-- ─── CATEGORIES ──────────────────────────────────────── -->
   <div id="section-categories" class="section-panel">
     <div class="flex items-center justify-between mb-6">
@@ -240,7 +240,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <p class="text-sm text-on-surface-variant mt-1">Controlá qué categorías se muestran y en qué orden en el menú.</p>
       </div>
     </div>
- 
+
     <!-- Category pills from products -->
     <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm mb-4">
       <div class="flex items-center justify-between mb-4">
@@ -256,21 +256,21 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <div class="skeleton h-10 rounded-xl"></div>
       </div>
     </div>
- 
+
     <!-- Custom order note -->
     <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
       <span class="material-symbols-outlined text-blue-500 mt-0.5 flex-shrink-0" style="font-variation-settings:'FILL' 1;">info</span>
       <p class="text-sm text-blue-700">El orden de las categorías en el menú es <strong>alfabético por defecto</strong>. Para cambiar el orden, modificá los nombres de las categorías en los productos desde el panel de Inventario.</p>
     </div>
   </div>
- 
+
   <!-- ─── TEXTS & BRANDING ─────────────────────────────────── -->
   <div id="section-texts" class="section-panel">
     <div class="mb-6">
       <h3 class="font-headline font-black text-2xl text-on-surface">Textos y Marca</h3>
       <p class="text-sm text-on-surface-variant mt-1">Personalizá los textos que aparecen en el menú público.</p>
     </div>
- 
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Branding -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
@@ -295,7 +295,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
           </div>
         </div>
       </div>
- 
+
       <!-- Social links -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
         <h4 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
@@ -319,7 +319,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
           </div>
         </div>
       </div>
- 
+
       <!-- Footer -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm lg:col-span-2">
         <h4 class="font-headline font-bold text-base text-on-surface mb-4 flex items-center gap-2">
@@ -339,32 +339,45 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         </div>
       </div>
     </div>
- 
+
     <div class="mt-6 flex justify-end">
       <button onclick="saveTexts()" class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-full font-headline font-bold text-sm shadow-md hover:opacity-90 active:scale-95 transition-all">
         <span class="material-symbols-outlined text-sm">save</span>
         Guardar cambios
       </button>
     </div>
- 
+
     <div class="mt-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
       <span class="material-symbols-outlined text-amber-500 mt-0.5 flex-shrink-0" style="font-variation-settings:'FILL' 1;">warning</span>
       <p class="text-sm text-amber-700">Estos textos se guardan en la tabla <strong>menu_settings</strong> de Supabase. El menú los leerá en cada carga. Ver SQL requerido abajo.</p>
     </div>
- 
+
     <div class="mt-4 bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/20">
       <p class="text-xs font-black text-outline uppercase tracking-widest mb-2">Tabla Supabase requerida</p>
-     
+      <pre class="text-xs text-on-surface-variant bg-surface-container rounded-xl p-4 overflow-x-auto leading-relaxed"><code>create table menu_settings (
+  id uuid primary key default gen_random_uuid(),
+  business_id uuid unique,
+  brand_name text default 'ONCEYDOCE',
+  tagline text,
+  newsletter_title text default 'JOIN THE CULT.',
+  instagram_url text,
+  tiktok_url text,
+  twitter_url text,
+  copyright_text text,
+  points_rate integer default 100,
+  updated_at timestamptz default now()
+);
+create policy "admin_settings" on menu_settings for all using (true);</code></pre>
     </div>
   </div>
- 
+
   <!-- ─── CART SETTINGS ────────────────────────────────────── -->
   <div id="section-cart-settings" class="section-panel">
     <div class="mb-6">
       <h3 class="font-headline font-black text-2xl text-on-surface">Carrito y Pedidos Online</h3>
       <p class="text-sm text-on-surface-variant mt-1">Controlá si los usuarios pueden hacer pedidos desde el menú público.</p>
     </div>
- 
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Main toggle -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
@@ -382,7 +395,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
           <span id="cart-status-text">Carrito habilitado — los usuarios pueden pedir</span>
         </div>
       </div>
- 
+
       <!-- Points system toggle -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
         <div class="flex items-start justify-between gap-4">
@@ -395,7 +408,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
           </div>
         </div>
       </div>
- 
+
       <!-- Login required -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
         <div class="flex items-start justify-between gap-4">
@@ -408,7 +421,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
           </div>
         </div>
       </div>
- 
+
       <!-- Schedule -->
       <div class="bg-surface-container-lowest rounded-2xl p-6 shadow-sm">
         <h4 class="font-headline font-bold text-base text-on-surface mb-3">Mensaje cuando el carrito está cerrado</h4>
@@ -420,7 +433,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         </button>
       </div>
     </div>
- 
+
     <div class="mt-6 bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/20">
       <p class="text-xs font-black text-outline uppercase tracking-widest mb-2">Tabla Supabase requerida (extender menu_settings)</p>
       <pre class="text-xs text-on-surface-variant bg-surface-container rounded-xl p-4 overflow-x-auto"><code>alter table menu_settings
@@ -430,7 +443,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
   add column if not exists cart_closed_msg text;</code></pre>
     </div>
   </div>
- 
+
   <!-- ─── CUSTOMERS ────────────────────────────────────────── -->
   <div id="section-customers" class="section-panel">
     <div class="flex items-center justify-between mb-6">
@@ -451,7 +464,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         </button>
       </div>
     </div>
- 
+
     <!-- Stats row -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm">
@@ -471,7 +484,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <p id="stat-customers-cult" class="font-headline font-black text-2xl" style="background:linear-gradient(135deg,#2b3896,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent">—</p>
       </div>
     </div>
- 
+
     <!-- Table -->
     <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
       <table class="w-full text-left border-collapse">
@@ -517,14 +530,29 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <p class="text-xs text-outline">OnceyDoce Clientes</p>
       </div>
     </div>
- 
+
     <!-- SQL hint -->
     <div class="mt-6 bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/20">
       <p class="text-xs font-black text-outline uppercase tracking-widest mb-2">Tabla Supabase requerida</p>
-      <pre class="text-xs text-on-surface-variant bg-surface-container rounded-xl p-4 overflow-x-auto"><code></code></pre>
+      <pre class="text-xs text-on-surface-variant bg-surface-container rounded-xl p-4 overflow-x-auto"><code>create table customer_profiles (
+  id uuid primary key references auth.users(id),
+  business_id uuid,
+  full_name text,
+  email text,
+  points integer default 0,
+  total_orders integer default 0,
+  total_spent numeric default 0,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+-- Política para que el admin pueda leer todos:
+create policy "admin_read_customers" on customer_profiles
+  for select using (true);
+create policy "users_manage_own" on customer_profiles
+  for all using (auth.uid() = id);</code></pre>
     </div>
   </div>
- 
+
   <!-- ─── NEWSLETTER ───────────────────────────────────────── -->
   <div id="section-newsletter" class="section-panel">
     <div class="flex items-center justify-between mb-6">
@@ -537,7 +565,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         Exportar CSV
       </button>
     </div>
- 
+
     <!-- Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div class="bg-surface-container-lowest rounded-2xl p-5 shadow-sm">
@@ -553,7 +581,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <p id="nl-this-week" class="font-headline font-black text-3xl text-tertiary">—</p>
       </div>
     </div>
- 
+
     <!-- List -->
     <div class="bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden">
       <div class="px-6 py-4 border-b border-outline-variant/15 flex items-center justify-between">
@@ -576,9 +604,9 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
       </div>
     </div>
   </div>
- 
+
 </main>
- 
+
 <!-- ══════════════════════════════════════════════════
      MODAL: BANNER
 ══════════════════════════════════════════════════ -->
@@ -590,10 +618,10 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
- 
+
     <div class="overflow-y-auto flex-1 px-8 py-6 space-y-5">
       <input type="hidden" id="banner-id"/>
- 
+
       <!-- Image URL -->
       <div>
         <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">URL de imagen</label>
@@ -606,7 +634,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         </div>
         <p class="text-xs text-on-surface-variant mt-1.5">Recomendado: 1400×460 px o mayor. Usá Supabase Storage para subir imágenes.</p>
       </div>
- 
+
       <!-- Tag -->
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -620,21 +648,21 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
             class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
         </div>
       </div>
- 
+
       <!-- Title -->
       <div>
         <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Título principal *</label>
         <input id="banner-title" type="text" placeholder="THE URBAN ONDA" required
           class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-primary outline-none"/>
       </div>
- 
+
       <!-- Subtitle -->
       <div>
         <label class="block text-[10px] font-black text-outline uppercase tracking-widest mb-2">Subtítulo</label>
         <input id="banner-subtitle" type="text" placeholder="Premium apparel meets street hospitality."
           class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
       </div>
- 
+
       <!-- Buttons -->
       <div class="grid grid-cols-2 gap-4">
         <div>
@@ -648,7 +676,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
             class="w-full bg-surface-container border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary outline-none"/>
         </div>
       </div>
- 
+
       <!-- Active toggle -->
       <div class="flex items-center justify-between bg-surface-container rounded-xl px-4 py-3">
         <div>
@@ -661,7 +689,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
         <input type="hidden" id="banner-active" value="true"/>
       </div>
     </div>
- 
+
     <div class="px-8 pb-7 pt-4 flex gap-3 flex-shrink-0 border-t border-outline-variant/15">
       <button onclick="closeBannerModal()" class="flex-1 py-3 font-bold text-on-surface-variant hover:bg-surface-container rounded-full transition-all text-sm">
         Cancelar
@@ -673,7 +701,7 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
     </div>
   </div>
 </div>
- 
+
 <!-- ══════════════════════════════════════════════════
      MODAL: DELETE CONFIRM
 ══════════════════════════════════════════════════ -->
@@ -690,12 +718,12 @@ create policy "admin_banners" on banners for all using (true);</code></pre>
     </div>
   </div>
 </div>
- 
+
 <!-- ══════════════════════════════════════════════════
      TOAST
 ══════════════════════════════════════════════════ -->
 <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-on-surface text-surface-container-lowest px-5 py-3 rounded-full text-sm font-bold shadow-2xl z-[200] opacity-0 pointer-events-none transition-opacity duration-300 flex items-center gap-2 whitespace-nowrap"></div>
- 
+
 <!-- ══════════════════════════════════════════════════
      SCRIPT
 ══════════════════════════════════════════════════ -->
@@ -705,10 +733,10 @@ const SUPABASE_URL  = 'https://sflleqzcdmaxzvkbgnns.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_DT1P9zuzWn2CO3y5kixg7w_1roSZHTV';
 const BUSINESS_ID   = '1222e4ad-e980-41bd-97e8-9962f4cc75a8';
 // ──────────────────────────────────────────────────────────────────────────────
- 
+
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
- 
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let allBanners      = [];
 let allCustomers    = [];
@@ -719,21 +747,21 @@ let currentSection  = 'banners';
 let pendingDeleteId = null;
 let settings        = {};
 let bannerActiveVal = true;
- 
+
 // ── NAVIGATION ────────────────────────────────────────────────────────────────
 function goTo(section) {
   // Deactivate all nav items
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   // Activate clicked
   event.currentTarget.classList.add('active');
- 
+
   // Hide all panels
   document.querySelectorAll('.section-panel').forEach(el => el.classList.remove('active'));
   // Show target
   document.getElementById('section-' + (section === 'products' ? 'banners' : section)).classList.add('active');
- 
+
   currentSection = section;
- 
+
   // Update topbar
   const titles = {
     banners: 'Banners', categories: 'Categorías', texts: 'Textos y Marca',
@@ -741,7 +769,7 @@ function goTo(section) {
   };
   document.getElementById('topbar-title').textContent = titles[section] || section;
   document.getElementById('topbar-badge').classList.add('hidden');
- 
+
   // Lazy load
   if (section === 'banners' && allBanners.length === 0) loadBanners();
   if (section === 'categories') loadCategories();
@@ -749,22 +777,22 @@ function goTo(section) {
   if (section === 'newsletter' && allNewsletter.length === 0) loadNewsletter();
   if (section === 'texts' || section === 'cart-settings') loadSettings();
 }
- 
+
 // ── BANNERS ───────────────────────────────────────────────────────────────────
 async function loadBanners() {
   document.getElementById('banners-skeleton').classList.remove('hidden');
   document.getElementById('banners-grid').innerHTML = '';
   document.getElementById('banners-empty').classList.add('hidden');
- 
+
   try {
     const { data, error } = await sb
       .from('banners')
       .select('*')
       .eq('business_id', BUSINESS_ID)
       .order('display_order', { ascending: true });
- 
+
     document.getElementById('banners-skeleton').classList.add('hidden');
- 
+
     if (error) throw error;
     allBanners = data || [];
     renderBanners();
@@ -775,18 +803,18 @@ async function loadBanners() {
     showToast('warn', 'Tabla "banners" no encontrada — ejecutá el SQL de abajo');
   }
 }
- 
+
 function renderBanners() {
   const grid  = document.getElementById('banners-grid');
   const empty = document.getElementById('banners-empty');
- 
+
   if (!allBanners.length) {
     grid.innerHTML = '';
     empty.classList.remove('hidden');
     return;
   }
   empty.classList.add('hidden');
- 
+
   grid.innerHTML = allBanners.map((b, i) => `
     <div class="banner-card bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm row-enter" style="animation-delay:${i*60}ms">
       <!-- Preview image -->
@@ -837,12 +865,12 @@ function renderBanners() {
     </div>
   `).join('');
 }
- 
+
 async function toggleBannerStatus(id, current) {
   const b = allBanners.find(x => x.id === id);
   if (b) b.active = !current;
   renderBanners();
- 
+
   const { error } = await sb.from('banners').update({ active: !current }).eq('id', id);
   if (error) {
     if (b) b.active = current;
@@ -852,7 +880,7 @@ async function toggleBannerStatus(id, current) {
     showToast('ok', !current ? 'Banner activado' : 'Banner desactivado');
   }
 }
- 
+
 // Banner Modal
 function openBannerModal(id = null) {
   const modal = document.getElementById('banner-modal');
@@ -865,7 +893,7 @@ function openBannerModal(id = null) {
   document.getElementById('banner-btn1').value = '';
   document.getElementById('banner-btn2').value = '';
   document.getElementById('banner-img-preview').classList.add('hidden');
- 
+
   if (id) {
     const b = allBanners.find(x => x.id === id);
     if (!b) return;
@@ -886,15 +914,15 @@ function openBannerModal(id = null) {
     document.getElementById('banner-save-text').textContent   = 'Crear Banner';
     setBannerActive(true);
   }
- 
+
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 }
- 
+
 function closeBannerModal() {
   document.getElementById('banner-modal').classList.replace('flex','hidden');
 }
- 
+
 function setBannerActive(val) {
   bannerActiveVal = val;
   document.getElementById('banner-active').value = val;
@@ -903,11 +931,11 @@ function setBannerActive(val) {
   if (val) { t.classList.replace('bg-outline-variant/50','bg-primary'); k.style.left='28px'; }
   else      { t.classList.replace('bg-primary','bg-outline-variant/50'); k.style.left='4px'; }
 }
- 
+
 function toggleBannerActive() {
   setBannerActive(!bannerActiveVal);
 }
- 
+
 function previewBannerImg() {
   const url = document.getElementById('banner-image-url').value.trim();
   const prev = document.getElementById('banner-img-preview');
@@ -919,12 +947,12 @@ function previewBannerImg() {
     prev.classList.add('hidden');
   }
 }
- 
+
 async function saveBanner() {
   const id    = document.getElementById('banner-id').value;
   const title = document.getElementById('banner-title').value.trim();
   if (!title) { showToast('warn', 'El título es requerido'); return; }
- 
+
   const payload = {
     business_id:         BUSINESS_ID,
     title,
@@ -936,9 +964,9 @@ async function saveBanner() {
     display_order:       parseInt(document.getElementById('banner-order').value) || 0,
     active:              document.getElementById('banner-active').value === 'true',
   };
- 
+
   document.getElementById('banner-save-text').textContent = 'Guardando...';
- 
+
   try {
     if (id) {
       const { error } = await sb.from('banners').update(payload).eq('id', id);
@@ -957,7 +985,7 @@ async function saveBanner() {
     document.getElementById('banner-save-text').textContent = id ? 'Guardar cambios' : 'Crear Banner';
   }
 }
- 
+
 // Delete
 function openDeleteModal(id) {
   pendingDeleteId = id;
@@ -979,32 +1007,32 @@ async function confirmDeleteBanner() {
   renderBanners();
   showToast('ok', 'Banner eliminado');
 }
- 
+
 // ── CATEGORIES ────────────────────────────────────────────────────────────────
 async function loadCategories() {
   document.getElementById('cat-list').innerHTML = '<div class="skeleton h-10 rounded-xl"></div><div class="skeleton h-10 rounded-xl mt-2"></div>';
- 
+
   try {
     const { data: products } = await sb
       .from('products')
       .select('category')
       .eq('business_id', BUSINESS_ID);
- 
+
     allCategories = [...new Set((products || []).map(p => p.category).filter(Boolean))].sort();
     renderCategories();
   } catch (e) {
     document.getElementById('cat-list').innerHTML = '<p class="text-sm text-error">Error al cargar categorías</p>';
   }
 }
- 
+
 function renderCategories() {
   const list = document.getElementById('cat-list');
- 
+
   if (!allCategories.length) {
     list.innerHTML = '<p class="text-sm text-on-surface-variant py-4 text-center">No se encontraron categorías en los productos</p>';
     return;
   }
- 
+
   list.innerHTML = allCategories.map(cat => {
     const hidden  = hiddenCategories.includes(cat);
     const visible = !hidden;
@@ -1025,7 +1053,7 @@ function renderCategories() {
     `;
   }).join('');
 }
- 
+
 function toggleCategory(cat) {
   if (hiddenCategories.includes(cat)) {
     hiddenCategories = hiddenCategories.filter(c => c !== cat);
@@ -1037,7 +1065,7 @@ function toggleCategory(cat) {
   localStorage.setItem('hidden_cats_' + BUSINESS_ID, JSON.stringify(hiddenCategories));
   renderCategories();
 }
- 
+
 // ── SETTINGS (texts + cart) ───────────────────────────────────────────────────
 async function loadSettings() {
   try {
@@ -1046,9 +1074,9 @@ async function loadSettings() {
       .select('*')
       .eq('business_id', BUSINESS_ID)
       .maybeSingle();
- 
+
     settings = data || {};
- 
+
     // Texts
     setVal('txt-brand-name',       settings.brand_name || 'ONCEYDOCE');
     setVal('txt-tagline',          settings.tagline || '');
@@ -1058,24 +1086,24 @@ async function loadSettings() {
     setVal('txt-twitter',          settings.twitter_url || '');
     setVal('txt-copyright',        settings.copyright_text || '');
     setVal('txt-points-rate',      settings.points_rate || 100);
- 
+
     // Cart settings
     setVal('txt-cart-closed-msg', settings.cart_closed_msg || '');
     applyToggle('cart',          settings.cart_enabled !== false);
     applyToggle('points',        settings.points_enabled !== false);
     applyToggle('login-required',settings.login_required === true);
     updateCartStatusMsg(settings.cart_enabled !== false);
- 
+
   } catch (e) {
     showToast('warn', 'Tabla "menu_settings" no encontrada — ejecutá el SQL de abajo');
   }
 }
- 
+
 function setVal(id, val) {
   const el = document.getElementById(id);
   if (el) el.value = val;
 }
- 
+
 function applyToggle(name, val) {
   const track = document.getElementById('toggle-' + name);
   const knob  = document.getElementById('knob-' + name);
@@ -1091,17 +1119,17 @@ function applyToggle(name, val) {
   }
   track.dataset.val = val ? 'true' : 'false';
 }
- 
+
 async function toggleSetting(key) {
   const map = { cart_enabled: 'cart', points_enabled: 'points', login_required: 'login-required' };
   const name = map[key];
   const track = document.getElementById('toggle-' + name);
   const cur   = track.dataset.val !== 'false';
   const next  = !cur;
- 
+
   applyToggle(name, next);
   if (key === 'cart_enabled') updateCartStatusMsg(next);
- 
+
   try {
     const { data: existing } = await sb.from('menu_settings').select('id').eq('business_id', BUSINESS_ID).maybeSingle();
     if (existing) {
@@ -1116,7 +1144,7 @@ async function toggleSetting(key) {
     showToast('warn', 'Error al guardar');
   }
 }
- 
+
 function updateCartStatusMsg(enabled) {
   const el  = document.getElementById('cart-status-msg');
   const txt = document.getElementById('cart-status-text');
@@ -1129,7 +1157,7 @@ function updateCartStatusMsg(enabled) {
     el.innerHTML  = `<span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1;">remove_shopping_cart</span><span>Carrito deshabilitado — solo lectura</span>`;
   }
 }
- 
+
 async function saveTexts() {
   const payload = {
     business_id:      BUSINESS_ID,
@@ -1143,7 +1171,7 @@ async function saveTexts() {
     points_rate:      parseInt(getVal('txt-points-rate')) || 100,
     updated_at:       new Date().toISOString(),
   };
- 
+
   try {
     const { data: existing } = await sb.from('menu_settings').select('id').eq('business_id', BUSINESS_ID).maybeSingle();
     if (existing) {
@@ -1157,7 +1185,7 @@ async function saveTexts() {
     showToast('warn', 'Error: ' + (e.message || 'crear la tabla primero'));
   }
 }
- 
+
 async function saveCartSettings() {
   const msg = getVal('txt-cart-closed-msg');
   try {
@@ -1173,12 +1201,12 @@ async function saveCartSettings() {
     showToast('warn', 'Error al guardar');
   }
 }
- 
+
 function getVal(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
- 
+
 // ── CUSTOMERS ─────────────────────────────────────────────────────────────────
 async function loadCustomers() {
   try {
@@ -1187,14 +1215,14 @@ async function loadCustomers() {
       .select('*')
       .eq('business_id', BUSINESS_ID)
       .order('created_at', { ascending: false });
- 
+
     document.getElementById('customers-skeleton').classList.add('hidden');
- 
+
     if (error) throw error;
     allCustomers = data || [];
     renderCustomers(allCustomers);
     updateCustomerStats();
- 
+
     // Update nav badge
     if (allCustomers.length > 0) {
       const badge = document.getElementById('badge-customers');
@@ -1208,12 +1236,12 @@ async function loadCustomers() {
     showToast('warn', 'Tabla "customer_profiles" no encontrada — ejecutá el SQL de abajo');
   }
 }
- 
+
 function renderCustomers(list) {
   const tbody = document.getElementById('customers-tbody');
   const empty = document.getElementById('customers-empty');
   const count = document.getElementById('customers-count');
- 
+
   if (!list.length) {
     tbody.innerHTML = '';
     empty.classList.remove('hidden');
@@ -1221,17 +1249,17 @@ function renderCustomers(list) {
     count.textContent = 'Sin clientes';
     return;
   }
- 
+
   empty.classList.add('hidden');
   empty.classList.remove('flex');
   count.textContent = `${list.length} de ${allCustomers.length} clientes`;
- 
+
   tbody.innerHTML = list.map((c, i) => {
     const pts      = c.points || 0;
     const tier     = getTier(pts);
     const initial  = (c.full_name || c.email || '?').charAt(0).toUpperCase();
     const dateStr  = c.created_at ? new Date(c.created_at).toLocaleDateString('es-AR') : '—';
- 
+
     return `
       <tr class="user-row transition-colors row-enter" style="animation-delay:${i*20}ms">
         <td class="px-6 py-4">
@@ -1265,7 +1293,7 @@ function renderCustomers(list) {
     `;
   }).join('');
 }
- 
+
 function filterCustomers() {
   const q = document.getElementById('customer-search').value.toLowerCase();
   const filtered = allCustomers.filter(c =>
@@ -1274,21 +1302,21 @@ function filterCustomers() {
   );
   renderCustomers(filtered);
 }
- 
+
 function updateCustomerStats() {
   document.getElementById('stat-customers-total').textContent  = allCustomers.length;
   document.getElementById('stat-customers-orders').textContent = allCustomers.filter(c => (c.total_orders||0) > 0).length;
   document.getElementById('stat-customers-points').textContent = allCustomers.reduce((s, c) => s + (c.points||0), 0).toLocaleString('es-AR');
   document.getElementById('stat-customers-cult').textContent   = allCustomers.filter(c => (c.points||0) >= 3000).length;
 }
- 
+
 function getTier(pts) {
   if (pts >= 3000) return { name: 'CULT',   cls: 'cult'   };
   if (pts >= 1500) return { name: 'ORO',    cls: 'gold'   };
   if (pts >= 500)  return { name: 'PLATA',  cls: 'silver' };
   return               { name: 'BRONCE', cls: 'bronze' };
 }
- 
+
 function exportCustomerEmails() {
   if (!allCustomers.length) { showToast('warn', 'Sin clientes para exportar'); return; }
   const rows = [['Nombre', 'Email', 'Puntos', 'Pedidos', 'Gastado', 'Nivel', 'Registro']];
@@ -1306,7 +1334,7 @@ function exportCustomerEmails() {
   downloadCSV(rows, 'clientes_onceydoce.csv');
   showToast('ok', `${allCustomers.length} clientes exportados`);
 }
- 
+
 // ── NEWSLETTER ────────────────────────────────────────────────────────────────
 async function loadNewsletter() {
   try {
@@ -1315,7 +1343,7 @@ async function loadNewsletter() {
       .select('*')
       .eq('business_id', BUSINESS_ID)
       .order('created_at', { ascending: false });
- 
+
     if (error) throw error;
     allNewsletter = data || [];
     renderNewsletter(allNewsletter);
@@ -1325,12 +1353,12 @@ async function loadNewsletter() {
     showToast('warn', 'Tabla "newsletter_subscribers" no encontrada');
   }
 }
- 
+
 function renderNewsletter(list) {
   const listEl = document.getElementById('nl-list');
   const empty  = document.getElementById('nl-empty');
   const count  = document.getElementById('nl-count');
- 
+
   if (!list.length) {
     listEl.innerHTML = '';
     empty.classList.remove('hidden');
@@ -1338,11 +1366,11 @@ function renderNewsletter(list) {
     count.textContent = 'Sin suscriptores';
     return;
   }
- 
+
   empty.classList.add('hidden');
   empty.classList.remove('flex');
   count.textContent = `${list.length} de ${allNewsletter.length} suscriptores`;
- 
+
   listEl.innerHTML = list.map((s, i) => `
     <div class="flex items-center justify-between px-6 py-3 hover:bg-surface-container-low transition-colors row-enter" style="animation-delay:${i*15}ms">
       <div class="flex items-center gap-3">
@@ -1355,22 +1383,22 @@ function renderNewsletter(list) {
     </div>
   `).join('');
 }
- 
+
 function filterNewsletter() {
   const q = document.getElementById('nl-search').value.toLowerCase();
   renderNewsletter(allNewsletter.filter(s => s.email.toLowerCase().includes(q)));
 }
- 
+
 function updateNewsletterStats() {
   const now       = new Date();
   const oneMonth  = new Date(now - 30 * 864e5);
   const oneWeek   = new Date(now - 7 * 864e5);
- 
+
   document.getElementById('nl-total').textContent      = allNewsletter.length;
   document.getElementById('nl-last-month').textContent = allNewsletter.filter(s => new Date(s.created_at) >= oneMonth).length;
   document.getElementById('nl-this-week').textContent  = allNewsletter.filter(s => new Date(s.created_at) >= oneWeek).length;
 }
- 
+
 function exportNewsletter() {
   if (!allNewsletter.length) { showToast('warn', 'Sin suscriptores para exportar'); return; }
   const rows = [['Email', 'Fecha']];
@@ -1378,7 +1406,7 @@ function exportNewsletter() {
   downloadCSV(rows, 'newsletter_onceydoce.csv');
   showToast('ok', `${allNewsletter.length} emails exportados`);
 }
- 
+
 // ── CSV EXPORT ────────────────────────────────────────────────────────────────
 function downloadCSV(rows, filename) {
   const csv  = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
@@ -1388,12 +1416,12 @@ function downloadCSV(rows, filename) {
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }
- 
+
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function escHtml(str) {
   return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
- 
+
 let toastTimer = null;
 function showToast(type, msg) {
   const icons = { ok: 'check_circle', warn: 'warning', info: 'info' };
@@ -1403,7 +1431,7 @@ function showToast(type, msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => toast.style.opacity = '0', 2800);
 }
- 
+
 let saveTimer = null;
 function showSaveIndicator() {
   const el = document.getElementById('save-indicator');
@@ -1415,19 +1443,14 @@ function showSaveIndicator() {
     el.classList.remove('flex');
   }, 3000);
 }
- 
+
 // ── KEYBOARD ──────────────────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeBannerModal(); closeDeleteModal(); }
 });
- 
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadBanners();
 </script>
 </body>
 </html>
- 
-
-
-
-
