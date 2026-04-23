@@ -474,51 +474,50 @@ let allCustomers         = [];    // cached for search
 let adjustCustomerId     = null;  // for the adjust modal
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────────────
-(function buildSidebar() {
-  const pages = [
-    { id: 'terminal',    icon: 'point_of_sale',  label: 'Terminal',          href: 'terminal.html' },
-    { id: 'orders',      icon: 'receipt_long',   label: 'Órdenes activas',   href: 'index.html' },
-    { id: 'inventario',  icon: 'inventory_2',    label: 'Inventario',        href: 'list-prod.html' },
-    { id: 'analytics',   icon: 'bar_chart',      label: 'Analytics',         href: 'analytics.html' },
-    { id: '---1', label: 'Menú Público' },
-    { id: 'banners',     icon: 'image',          label: 'Banners',           href: 'menu-admin.html' },
-    { id: 'cart-cfg',    icon: 'shopping_cart',  label: 'Carrito / Pedidos', href: 'menu-admin.html' },
-    { id: '---2', label: 'Clientes' },
-    { id: 'customers',   icon: 'group',          label: 'Usuarios',          href: 'menu-admin.html' },
-    { id: 'newsletter',  icon: 'mail',           label: 'Newsletter',        href: 'menu-admin.html' },
-    { id: '---3', label: 'Sistema' },
-    { id: 'import',      icon: 'upload_file',    label: 'Importar',          href: 'import-products.html' },
-    { id: 'setup',       icon: 'settings',       label: 'Configuración',     href: 'setup.html' },
-  ];
-
-  const navHtml = pages.map(p => {
-    if (p.id.startsWith('---')) return `<p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">${p.label}</p>`;
-    const active = p.id === 'terminal';
-    return `<a href="${p.href}" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:${active?700:600};text-decoration:none;color:${active?'#2b3896':'#454652'};background:${active?'rgba(43,56,150,.1)':'transparent'};transition:all .15s"
-      onmouseover="if(!this.style.background.includes('150'))this.style.background='#e9f6fd'" onmouseout="if(!this.style.background.includes('150'))this.style.background='transparent'">
-      <span class="material-symbols-outlined" style="font-size:1rem;color:${active?'#2b3896':'inherit'}">${p.icon}</span>${p.label}</a>`;
-  }).join('');
-
-  document.body.insertAdjacentHTML('afterbegin', `
-    <aside style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#fff;border-right:1px solid rgba(197,197,212,.3);display:flex;flex-direction:column;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.05)">
-      <div style="padding:1.1rem 1.4rem;border-bottom:1px solid rgba(197,197,212,.2);display:flex;align-items:center;gap:.7rem">
-        <div style="width:2.1rem;height:2.1rem;background:#2b3896;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <span class="material-symbols-outlined" style="color:#fff;font-size:1rem;font-variation-settings:'FILL' 1">storefront</span>
+// Usar sidebar.js compartido si está disponible, si no construir inline como fallback
+if (typeof initSidebar === 'function') {
+  initSidebar('terminal');
+} else {
+  (function buildSidebar() {
+    const pages = [
+      { id: 'terminal',   icon: 'point_of_sale', label: 'Terminal',        href: 'terminal.html' },
+      { id: 'orders',     icon: 'receipt_long',  label: 'Órdenes activas', href: 'index.html' },
+      { id: 'inventario', icon: 'inventory_2',   label: 'Inventario',      href: 'list-prod.html' },
+      { id: 'analytics',  icon: 'bar_chart',     label: 'Analytics',       href: 'analytics.html' },
+      { id: '---1', label: 'Clientes' },
+      { id: 'customers',  icon: 'group',         label: 'Clientes',        href: 'customers.html' },
+      { id: '---2', label: 'Sistema' },
+      { id: 'import',     icon: 'upload_file',   label: 'Importar',        href: 'import-products.html' },
+      { id: 'setup',      icon: 'settings',      label: 'Configuración',   href: 'setup.html' },
+    ];
+    const navHtml = pages.map(p => {
+      if (p.id.startsWith('---')) return `<p style="padding:.5rem 1rem .25rem;font-size:.55rem;font-weight:900;color:#757684;text-transform:uppercase;letter-spacing:.1em;margin-top:.6rem">${p.label}</p>`;
+      const active = p.id === 'terminal';
+      return `<a href="${p.href}" style="display:flex;align-items:center;gap:.65rem;padding:.55rem .9rem;border-radius:.65rem;font-size:.78rem;font-weight:${active?700:600};text-decoration:none;color:${active?'#2b3896':'#454652'};background:${active?'rgba(43,56,150,.1)':'transparent'};transition:all .15s"
+        onmouseover="if(!this.style.background.includes('150'))this.style.background='#e9f6fd'" onmouseout="if(!this.style.background.includes('150'))this.style.background='transparent'">
+        <span class="material-symbols-outlined" style="font-size:1rem;color:${active?'#2b3896':'inherit'}">${p.icon}</span>${p.label}</a>`;
+    }).join('');
+    document.body.insertAdjacentHTML('afterbegin', `
+      <aside style="position:fixed;left:0;top:0;height:100%;width:16rem;background:#fff;border-right:1px solid rgba(197,197,212,.3);display:flex;flex-direction:column;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.05)">
+        <div style="padding:1.1rem 1.4rem;border-bottom:1px solid rgba(197,197,212,.2);display:flex;align-items:center;gap:.7rem">
+          <div style="width:2.1rem;height:2.1rem;background:#2b3896;border-radius:.65rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <span class="material-symbols-outlined" style="color:#fff;font-size:1rem;font-variation-settings:'FILL' 1">storefront</span>
+          </div>
+          <div>
+            <p style="font-family:Manrope,sans-serif;font-weight:900;font-size:.82rem;color:#111d23;line-height:1">OnceyDoce</p>
+            <p style="font-size:.58rem;color:#757684;margin-top:.15rem">Panel de control</p>
+          </div>
         </div>
-        <div>
-          <p style="font-family:Manrope,sans-serif;font-weight:900;font-size:.82rem;color:#111d23;line-height:1">OnceyDoce</p>
-          <p style="font-size:.58rem;color:#757684;margin-top:.15rem">Panel de control</p>
+        <nav style="flex:1;padding:.6rem;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem">${navHtml}</nav>
+        <div style="padding:.9rem;border-top:1px solid rgba(197,197,212,.2)">
+          <a href="menu.html" target="_blank" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border-radius:.65rem;background:#e9f6fd;text-decoration:none">
+            <span class="material-symbols-outlined" style="font-size:.9rem;color:#2b3896">open_in_new</span>
+            <span style="font-size:.68rem;font-weight:700;color:#2b3896;font-family:Manrope,sans-serif">Ver menú público</span>
+          </a>
         </div>
-      </div>
-      <nav style="flex:1;padding:.6rem;overflow-y:auto;display:flex;flex-direction:column;gap:.1rem">${navHtml}</nav>
-      <div style="padding:.9rem;border-top:1px solid rgba(197,197,212,.2)">
-        <a href="menu.html" target="_blank" style="display:flex;align-items:center;gap:.5rem;padding:.45rem .7rem;border-radius:.65rem;background:#e9f6fd;text-decoration:none">
-          <span class="material-symbols-outlined" style="font-size:.9rem;color:#2b3896">open_in_new</span>
-          <span style="font-size:.68rem;font-weight:700;color:#2b3896;font-family:Manrope,sans-serif">Ver menú público</span>
-        </a>
-      </div>
-    </aside>`);
-})();
+      </aside>`);
+  })();
+}
 
 // ── CART BUTTONS ──────────────────────────────────────────────────────────────
 function updateCartButtons() {
@@ -831,29 +830,65 @@ window.addToCart = function(productId) {
   const p = allProducts.find(x => x.id === productId);
   if (!p) return;
   const ex = cartItems.find(i => i.id === productId);
-  if (ex) ex.quantity++;
-  else cartItems.push({ id: p.id, name: p.name, price: parseFloat(p.price||0), category: p.category||'', quantity: 1, itemId: null, note: '' });
+  if (ex) {
+    ex.quantity++;
+    if (currentOrderId) syncItemToBackend(p.id, 1);
+  } else {
+    const newItem = { id: p.id, name: p.name, price: parseFloat(p.price||0), category: p.category||'', quantity: 1, itemId: null, note: '' };
+    cartItems.push(newItem);
+    if (currentOrderId) syncItemToBackend(p.id, 1);
+  }
   renderCartUI();
-  if (currentOrderId) syncItemToBackend(p.id, 1);
   showToast('add', `+ ${p.name}`);
 };
 
 async function syncItemToBackend(productId, qty) {
   try {
-    await fetch(`${API_URL}/orders/add-item`, {
-      method: 'POST', headers: JSON_HEADERS,
-      body: JSON.stringify({ order_id: currentOrderId, product_id: productId, quantity: qty }),
-    });
+    // qty > 0: agregar, qty < 0: decrementar
+    const item = cartItems.find(i => i.id === productId);
+    if (qty > 0) {
+      const res = await fetch(`${API_URL}/orders/add-item`, {
+        method: 'POST', headers: JSON_HEADERS,
+        body: JSON.stringify({ order_id: currentOrderId, product_id: productId, quantity: qty }),
+      });
+      // Guardar el itemId devuelto por el backend si el item aún no lo tiene
+      if (item && !item.itemId) {
+        const data = await res.json().catch(() => null);
+        if (data?.id) item.itemId = data.id;
+      }
+    } else {
+      // Decremento: usar PATCH si el endpoint existe, si no DELETE y re-crear
+      if (item?.itemId) {
+        const newQty = (item.quantity); // ya decrementado antes de llamar esta función
+        await fetch(`${API_URL}/orders/item/${item.itemId}`, {
+          method: 'PATCH', headers: JSON_HEADERS,
+          body: JSON.stringify({ quantity: newQty }),
+        });
+      }
+    }
   } catch {}
 }
 
 window.removeFromCart = function(id) {
   const item = cartItems.find(i => i.id === id);
   if (!item) return;
-  if (item.quantity > 1) item.quantity--;
-  else cartItems = cartItems.filter(i => i.id !== id);
+  if (item.quantity > 1) {
+    item.quantity--;
+    if (currentOrderId) syncItemToBackend(item.id, -1);
+  } else {
+    cartItems = cartItems.filter(i => i.id !== id);
+    if (currentOrderId && item.itemId) removeItemFromBackend(item.itemId);
+  }
   renderCartUI();
 };
+
+async function removeItemFromBackend(itemId) {
+  try {
+    await fetch(`${API_URL}/orders/item/${itemId}`, {
+      method: 'DELETE', headers: HEADERS,
+    });
+  } catch {}
+}
 
 window.clearCart = function() {
   if (!cartItems.length) return;
